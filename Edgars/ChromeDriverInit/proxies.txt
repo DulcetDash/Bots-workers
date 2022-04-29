@@ -1,0 +1,10 @@
+209.127.191.180:9279:jcafnmuu:s9gx0ws83haa
+45.95.96.187:8746:jcafnmuu:s9gx0ws83haa
+45.95.96.237:8796:jcafnmuu:s9gx0ws83haa
+45.95.96.132:8691:jcafnmuu:s9gx0ws83haa
+45.136.228.154:6209:jcafnmuu:s9gx0ws83haa
+45.94.47.66:8110:jcafnmuu:s9gx0ws83haa
+45.94.47.108:8152:jcafnmuu:s9gx0ws83haa
+193.8.56.119:9183:jcafnmuu:s9gx0ws83haa
+45.95.99.226:7786:jcafnmuu:s9gx0ws83haa
+45.95.99.20:7580:jcafnmuu:s9gx0ws83haa
