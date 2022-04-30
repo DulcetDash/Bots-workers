@@ -1,5 +1,5 @@
 '''
-1. Create a facebook account for the person freshly created by the person model creator.
+1. Get all the catalogue from Edgars.
 '''
 # prettier-ignore
 from ast import Try

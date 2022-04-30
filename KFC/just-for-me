@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html ng-app="orderServMenu" ng-controller="AppCtrl">
+<head>
+    
+
+
+<script>
+    //-----OSERV-17342---Start----
+    window.onerror = function (message, file, line) {
+        //console.log("window.onerror called , message ", message);
+        //if (dataLayer !== undefined) {
+            dataLayer.push({
+                event: 'tempError',
+                eventCategory: 'Error',
+                eventLabel: 'GBL_ZA',
+                eventAction: message
+            });
+        //}
+    }
+    function pushDataLayerPopup(message) {
+        //console.log("PushDataLayerPopup called ", message);
+        if (dataLayer !== undefined) {
+            dataLayer.push({
+                event: 'popupView',
+                eventCategory: 'Popup',
+                eventLabel: 'GBL_ZA',
+                eventAction: message
+            });
+        }
+    }
+
+    function GetDeviceName() {
+        if (navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/webOS/i) || navigator.userAgent.match(/iPhone/i)
+            || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/BlackBerry/i) || navigator.userAgent.match(/Windows Phone/i)
+        ) {
+            return ("mobile");
+        }
+        else {
+            return ("desktop");
+        }
+    }
+   
+
+</script>
+
+
+
+    <!-- Google Tag Manager -->
+<script>
+    (function (w, d, s, l, i) {
+        w[l] = w[l] || []; w[l].push({
+            'gtm.start':
+                new Date().getTime(), event: 'gtm.js'
+        }); var f = d.getElementsByTagName(s)[0],
+            j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'dataLayer', 'GTM-WPJ82K');</script>
+    <!-- End Google Tag Manager -->
+
+    <script
+    src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"
+    type="text/javascript"
+    charset="UTF-8"
+    data-domain-script="44b24b7b-76f3-42dc-916e-c1a3a1161c79" >
+    </script>
+<script type="text/javascript">
+function OptanonWrapper() { }
+</script>
+
+
+<script type="text/javascript">
+ //+function (a, p, P, b, y) { appboy = {}; appboyQueue = []; for (var s = "initialize destroy getDeviceId toggleAppboyLogging setLogger openSession changeUser requestImmediateDataFlush requestFeedRefresh subscribeToFeedUpdates requestContentCardsRefresh subscribeToContentCardsUpdates logCardImpressions logCardClick logCardDismissal logFeedDisplayed logContentCardsDisplayed logInAppMessageImpression logInAppMessageClick logInAppMessageButtonClick logInAppMessageHtmlClick subscribeToNewInAppMessages removeSubscription removeAllSubscriptions logCustomEvent logPurchase isPushSupported isPushBlocked isPushGranted isPushPermissionGranted registerAppboyPushMessages unregisterAppboyPushMessages submitFeedback trackLocation stopWebTracking resumeWebTracking wipeData ab ab.DeviceProperties ab.User ab.User.Genders ab.User.NotificationSubscriptionTypes ab.User.prototype.getUserId ab.User.prototype.setFirstName ab.User.prototype.setLastName ab.User.prototype.setEmail ab.User.prototype.setGender ab.User.prototype.setDateOfBirth ab.User.prototype.setCountry ab.User.prototype.setHomeCity ab.User.prototype.setLanguage ab.User.prototype.setEmailNotificationSubscriptionType ab.User.prototype.setPushNotificationSubscriptionType ab.User.prototype.setPhoneNumber ab.User.prototype.setAvatarImageUrl ab.User.prototype.setLastKnownLocation ab.User.prototype.setUserAttribute ab.User.prototype.setCustomUserAttribute ab.User.prototype.addToCustomAttributeArray ab.User.prototype.removeFromCustomAttributeArray ab.User.prototype.incrementCustomUserAttribute ab.User.prototype.addAlias ab.User.prototype.setCustomLocationAttribute ab.InAppMessage ab.InAppMessage.SlideFrom ab.InAppMessage.ClickAction ab.InAppMessage.DismissType ab.InAppMessage.OpenTarget ab.InAppMessage.ImageStyle ab.InAppMessage.TextAlignment ab.InAppMessage.Orientation ab.InAppMessage.CropType ab.InAppMessage.prototype.subscribeToClickedEvent ab.InAppMessage.prototype.subscribeToDismissedEvent ab.InAppMessage.prototype.removeSubscription ab.InAppMessage.prototype.removeAllSubscriptions ab.InAppMessage.Button ab.InAppMessage.Button.prototype.subscribeToClickedEvent ab.InAppMessage.Button.prototype.removeSubscription ab.InAppMessage.Button.prototype.removeAllSubscriptions ab.SlideUpMessage ab.ModalMessage ab.FullScreenMessage ab.HtmlMessage ab.ControlMessage ab.Feed ab.Feed.prototype.getUnreadCardCount ab.ContentCards ab.ContentCards.prototype.getUnviewedCardCount ab.Card ab.ClassicCard ab.CaptionedImage ab.Banner ab.ControlCard ab.WindowUtils display display.automaticallyShowNewInAppMessages display.showInAppMessage display.showFeed display.destroyFeed display.toggleFeed display.showContentCards display.hideContentCards display.toggleContentCards sharedLib".split(" "), i = 0; i < s.length; i++) { for (var m = s[i], k = appboy, l = m.split("."), j = 0; j < l.length - 1; j++)k = k[l[j]]; k[l[j]] = (new Function("return function " + m.replace(/\./g, "_") + "(){appboyQueue.push(arguments); return true}"))() } appboy.getUser = function () { return new appboy.ab.User }; appboy.getCachedFeed = function () { return new appboy.ab.Feed }; appboy.getCachedContentCards = function () { return new appboy.ab.ContentCards }; (y = p.createElement(P)).type = 'text/javascript'; y.src = 'https://js.appboycdn.com/web-sdk/2.2/appboy.min.js'; y.async = 1; (b = p.getElementsByTagName(P)[0]).parentNode.insertBefore(y, b) }(window, document, 'script');
+
+ //   appboy.initialize('347592ee-4742-4310-ae22-64212dc625d2', { baseUrl: 'https://sdk.iad-06.braze.com/api/v3' })
+ //   appboy.openSession();
+ //       appboy.toggleAppboyLogging();
+    
+  window.mParticle = {
+    config: {
+      isDevelopmentMode: false//switch to false (or remove) for production
+    }
+  };
+
+  (
+    function(t){window.mParticle=window.mParticle||{};window.mParticle.EventType={Unknown:0,Navigation:1,Location:2,Search:3,Transaction:4,UserContent:5,UserPreference:6,Social:7,Other:8};window.mParticle.eCommerce={Cart:{}};window.mParticle.Identity={};window.mParticle.config=window.mParticle.config||{};window.mParticle.config.rq=[];window.mParticle.config.snippetVersion=2.2;window.mParticle.ready=function(t){window.mParticle.config.rq.push(t)};var e=["endSession","logError","logBaseEvent","logEvent","logForm","logLink","logPageView","setSessionAttribute","setAppName","setAppVersion","setOptOut","setPosition","startNewSession","startTrackingLocation","stopTrackingLocation"];var o=["setCurrencyCode","logCheckout"];var i=["identify","login","logout","modify"];e.forEach(function(t){window.mParticle[t]=n(t)});o.forEach(function(t){window.mParticle.eCommerce[t]=n(t,"eCommerce")});i.forEach(function(t){window.mParticle.Identity[t]=n(t,"Identity")});function n(e,o){return function(){if(o){e=o+"."+e}var t=Array.prototype.slice.call(arguments);t.unshift(e);window.mParticle.config.rq.push(t)}}var mp=document.createElement("script");mp.type="text/javascript";mp.async=true;mp.src=("https:"==document.location.protocol?"https://jssdkcdns":"http://jssdkcdn")+".mparticle.com/js/v2/"+t+"/mparticle.js";var c=document.getElementsByTagName("script")[0];c.parentNode.insertBefore(mp,c)}
+  )("us1-4d913660064efb429b964f803327a603");
+</script>
+
+    <meta charset="utf-8" />
+<base href="/">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="apple-mobile-web-app-title" content="KFC South Africa" />
+<meta name="apple-touch-fullscreen" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="referrer" content="origin-when-crossorigin" />
+<meta name="msapplication-tooltip" content="KFC Delivery">
+<meta name="msapplication-window" content="width=1024;height=768">
+<meta name="application-name" content="KFC Online Ordering" />
+<meta name="msapplication-allowDomainApiCalls" content="true" />
+<meta name="facebook-domain-verification" content="eev9cium9y2kxxk2nyq6pr29hakcyg" />
+    <meta name="keywords" content="KFC meal for one, KFC meals" />
+
+<meta name="description" content='Choose from a variety of  KFC&#39;s famous fried chicken meals that are perfect just fror you. Get prices and place your order online now' />
+
+
+        <link rel="alternate" href="https://order.kfc.co.za/menu/just-for-me" hreflang="en" />
+
+
+
+
+
+ 
+<meta name="msapplication-TileColor" content="#000000" />
+<META Http-Equiv="Cache-Control" Content="no-cache"/>
+<META Http-Equiv="Pragma" Content="no-cache" />
+<META Http-Equiv="Expires" Content="0" />
+<meta http-equiv="cleartype" content="on" />
+
+
+
+
+<noscript><meta http-equiv="X-Frame-Options" content="DENY" /></noscript>
+<style id="antiClickjack">
+    body {
+        display: none !important;
+    }
+</style>
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
+
+        <title data-ng-bind="pageTitle">Order KFC Online | Order KFC Just For Me Meals Online</title>
+    <link rel="preload" href="/fonts/national/National2Web-Bold.woff" as="font" crossorigin />
+    <link rel="preload" href="/fonts/national/National2CondensedWeb-Bold.woff" as="font" crossorigin />
+	<link rel="preload" href="/fonts/knockout/Knockout-HTF29-JuniorLiteweight.otf" as="font" crossorigin />
+    <link rel="preload" href="/fonts/knockout/Knockout-HTF70-FullWelterwt.otf" as="font" crossorigin />
+	
+	
+    
+    <link href="/Content/css_v2?v=AYf1_HgTUGDzRJvq3z5_WKjGANB_vmjPw1S98iBLm1g1" rel="stylesheet"/>
+
+    <script type="text/javascript" src="https://appx/web-view.min.js"></script>
+
+<script>(window.BOOMR_mq=window.BOOMR_mq||[]).push(["addVar",{"rua.upush":"false","rua.cpush":"false","rua.upre":"false","rua.cpre":"false","rua.uprl":"false","rua.cprl":"false","rua.cprf":"false","rua.trans":"","rua.cook":"false","rua.ims":"false","rua.ufprl":"false","rua.cfprl":"false","rua.isuxp":"false","rua.texp":"norulematch"}]);</script>
+                              <script>!function(a){var e="https://s.go-mpulse.net/boomerang/",t="addEventListener";if("False"=="True")a.BOOMR_config=a.BOOMR_config||{},a.BOOMR_config.PageParams=a.BOOMR_config.PageParams||{},a.BOOMR_config.PageParams.pci=!0,e="https://s2.go-mpulse.net/boomerang/";if(window.BOOMR_API_key="CQXQN-LTB63-C4TSR-42WUD-5J8FQ",function(){function n(e){a.BOOMR_onload=e&&e.timeStamp||(new Date).getTime()}if(!a.BOOMR||!a.BOOMR.version&&!a.BOOMR.snippetExecuted){a.BOOMR=a.BOOMR||{},a.BOOMR.snippetExecuted=!0;var i,_,o,r=document.createElement("iframe");if(a[t])a[t]("load",n,!1);else if(a.attachEvent)a.attachEvent("onload",n);r.src="javascript:void(0)",r.title="",r.role="presentation",(r.frameElement||r).style.cssText="width:0;height:0;border:0;display:none;",o=document.getElementsByTagName("script")[0],o.parentNode.insertBefore(r,o);try{_=r.contentWindow.document}catch(O){i=document.domain,r.src="javascript:var d=document.open();d.domain='"+i+"';void(0);",_=r.contentWindow.document}_.open()._l=function(){var a=this.createElement("script");if(i)this.domain=i;a.id="boomr-if-as",a.src=e+"CQXQN-LTB63-C4TSR-42WUD-5J8FQ",BOOMR_lstart=(new Date).getTime(),this.body.appendChild(a)},_.write("<bo"+'dy onload="document._l();">'),_.close()}}(),"".length>0)if(a&&"performance"in a&&a.performance&&"function"==typeof a.performance.setResourceTimingBufferSize)a.performance.setResourceTimingBufferSize();!function(){if(BOOMR=a.BOOMR||{},BOOMR.plugins=BOOMR.plugins||{},!BOOMR.plugins.AK){var e=""=="true"?1:0,t="",n="udzax4qxgrbtqytmdkya-f-1b5d2e80f-clientnsv4-s.akamaihd.net",i="false"=="true"?2:1,_={"ak.v":"32","ak.cp":"815958","ak.ai":parseInt("513415",10),"ak.ol":"0","ak.cr":77,"ak.ipv":4,"ak.proto":"http/1.1","ak.rid":"3086836c","ak.r":33125,"ak.a2":e,"ak.m":"","ak.n":"essl","ak.bpcip":"160.242.11.0","ak.cport":64313,"ak.gh":"23.52.67.52","ak.quicv":"","ak.tlsv":"tls1.3","ak.0rtt":"","ak.csrc":"-","ak.acc":"reno","ak.t":"1651251888","ak.ak":"hOBiQwZUYzCg5VSAfCLimQ==uYpXK8k5Yy9JpG+TT/kle7/j0O4UxpX63WMrXO0hTy7Wg4lf1Lv4S3JmEIyxwOyeiTzKTVVUO1I+ICslFgsGac+WK8q5EXZop5d62/92vBlhB6za50eQ4IhJPdadcfyisq17LOe50PsD4Hz7GIHiYOF0kEMYSsOSMWoWL/PM057GSGvCE3JsE4HiwPnnqFcIb1Mpf11TSbTovtKVr+2Zwyc8nXbJ1bYe1FzxUAQKGrX9CDeqsIz52537v1Jc8m0tii1OHdKz1+Mc1RS423Ox5Y56tlH0RDwCQdopUX3XIOFF/F7yyOX67XNPKUqP2UMufnJ1MCJH8PKvpz+Vldk6kXrYqUc9bTOep4XREarjBWjsdAS/h4APIXjIuwfQH/uStxXy+RQC+EWwh70pRfOaAcZ2z2Dfe5BUh0EsouV3YwQ=","ak.pv":"17","ak.dpoabenc":"","ak.tf":i};if(""!==t)_["ak.ruds"]=t;var o={i:!1,av:function(e){var t="http.initiator";if(e&&(!e[t]||"spa_hard"===e[t]))_["ak.feo"]=void 0!==a.aFeoApplied?1:0,BOOMR.addVar(_)},rv:function(){var a=["ak.bpcip","ak.cport","ak.cr","ak.csrc","ak.gh","ak.ipv","ak.m","ak.n","ak.ol","ak.proto","ak.quicv","ak.tlsv","ak.0rtt","ak.r","ak.acc","ak.t","ak.tf"];BOOMR.removeVar(a)}};BOOMR.plugins.AK={akVars:_,akDNSPreFetchDomain:n,init:function(){if(!o.i){var a=BOOMR.subscribe;a("before_beacon",o.av,null,null),a("onbeacon",o.rv,null,null),o.i=!0}return this},is_complete:function(){return!0}}}}()}(window);</script></head>
+
+<body ng-class="{'modal-open' : modalOn, 'worldcup-bg':IsOnlineExclusive}">
+    <div class="landscape_message_v2">
+    <div class="ld_message_holder">
+        <div class="ld_icon">
+            <img src="/Content/OnlineOrderingImages/Shared/icons_v2/mobile_rotate.svg" alt="KFC" height="100" >
+        </div>
+        <div class="ld_message">
+            <h2>Please rotate your device</h2>
+            <p>We don't support landscape mode yet. Please go back to portrait mode for best experience</p>
+        </div>
+    </div>
+</div>
+    
+<noscript>
+    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WPJ82K"
+            height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
+
+
+
+
+    <div class="bar-loader" id="bar-loader-layout" style="display: none;"></div>
+    <main>
+ <input id="ShowTradeUpItems" name="ShowTradeUpItems" type="hidden" value="true" />
+        <input type="hidden" id="hdnDesignIsVersion2" value="true" />
+
+        <header id="header-wrap" class="">
+            <div class="container clearfix ">
+
+                
+<span class="hidden" id="minapp-input">False</span>
+<span class="hidden" id="app-input">False</span>
+<a href="/menu" class="logo">
+            <img src="/Content/OnlineOrderingImages/Shared/icons_v2/logo_mob.svg" alt="KFC" height="25" class="d-xl-none" data-gtm-click-event-tracker="true" data-gtm-event-name="Universal Header" data-gtm-event-action="Logo" data-gtm-event-label="Logo CTA Click" />
+            <img src="/Content/OnlineOrderingImages/Shared/icons_v2/logo_desk.svg" height="64" width="64" alt="KFC" class="d-none  d-xl-block" data-gtm-click-event-tracker="true" data-gtm-event-name="Universal Header" data-gtm-event-action="Logo" data-gtm-event-label="Logo CTA Click" />
+</a>
+
+
+
+        <!--Desktop Mode-->
+        <div class="header-right-section" id="header-user-data">
+
+                    <a href="/ourrestaurants" class="findkfc-v2 ">Find a KFC</a>
+                    <span id="spnUserInfo">
+                        <a class=" openOTPPopUp icon-signup" data-gtm-click-event-tracker="true" data-gtm-event-action="Universal Header" data-gtm-event-name="Sign In" href="/account" onclick="callDataLayerSignup()">Sign Up</a>
+                        <span class="text-bold icon-signup">/</span>
+                        <a class=" openOTPPopUp icon-signin" data-gtm-click-event-tracker="true" data-gtm-event-action="Universal Header" data-gtm-event-name="Sign In" href="/login" onclick=" ">Sign In</a>
+
+
+                    </span>
+            
+<input type="hidden" id="hdnLanguage" value="en-US" />   
+
+            <a class="nav-menu-link d-md-none " href="javascript:void(0);" data-toggle="mobileMenu"><i class="icon icon-nav"></i></a>
+        </div>
+
+
+
+
+                <input type="hidden" id="hdnLoggedIn" value="False" />
+            </div>
+        </header>
+		 <!--Sticky Header and selected disposition Start-->
+        
+
+
+        <!--Sticky Header and selected disposition Start-->
+        <nav class="stickymenu">
+            <div id="stickyCartHeader" class="clearfix">
+
+
+<div class="menu-wrap-v2 container">
+    <input type="hidden" id="hidRecommendPageShow" name="hidRecommendPageShow" value="true" />
+    <input type="hidden" id="hdnGuestRecommended" name="hdnGuestRecommended" value="true" />
+	
+    <div class="vm-show">
+        <div class="nav-full">
+            <a href="/store-selection" class="btn aStartOrderBtn " data-gtm-click-event-tracker="true" data-gtm-event-name="localization" data-gtm-event-action="Start my order" onclick=" return start(this)">START MY ORDER</a>
+        </div>
+    </div>
+    <div class="vm-hide">
+        <div class="nav-left">
+                <a href="/store-selection" class="btn aStartOrderBtn " data-gtm-click-event-tracker="true" data-gtm-event-name="localization" data-gtm-event-action="Start my order" onclick=" return start(this)">START MY ORDER</a>
+        </div>
+        <div class="nav-right">
+
+            <div class="isrestaurentselected ">
+
+                
+                <a href="javascript:void(0)" class="linkCartIcon" onclick="GotoCartPage()">
+                    <span class="cart-mini-v2">
+                        <p id="cartHeaderQty">0</p>
+                    </span>
+                    <span class="price" id="cartHeaderPrice">
+                        R0,00
+                    </span>
+                </a>
+            </div>
+
+        </div>
+    </div>
+    
+    
+</div>
+
+
+
+<!-- ---------   -->
+
+    <input type="hidden" id="hdnCartItemQuantityInformation" value="" />
+<input type="hidden" id="hdnQuantityAvailable" value="" />
+<script>
+    function GotoCartPage() {
+         var hiddenValue = document.getElementById("hidRecommendPageShow");
+         if (hiddenValue !== null && hiddenValue !== undefined) {
+            var hidRecommendPageShow = document.getElementById("hidRecommendPageShow").value;
+            //alert("hidRecommendPageShow " + hidRecommendPageShow);
+            if (hidRecommendPageShow == "true") {
+                window.location.href = "/menu/recommended";
+            } else {
+                window.location.href = "/menu/my-cart";
+            }
+        }else{
+		   window.location.href = "/menu/my-cart";
+		}
+    }
+     function OpenLink(link) {
+        window.location.href = link;
+    }
+</script>
+            </div>
+
+        </nav>
+
+        <!--Sticky Header and selected disposition End-->
+
+        <div id="RenderBodyDiv" class="container-full">
+
+            
+
+
+
+
+
+<div id="openSavedAddressModal" class="openSavedAddressModal delivery-details">
+    <div class="deliveryaddress-details-form">
+
+            <a href="/store-selection" class="btn white btn-block mb-4">
+                Add a new address
+            </a>
+
+
+
+
+      
+            <a href="javascript:void(0);" onclick="ShowSavedAddress(false)" class="btn white btn-block">Cancel</a>
+        
+    </div>
+</div>
+<div class="modal fade" id="txtCityZipCodeModal" data-keyboard="false" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="txtCityZipCodeModalHeader"></span>
+            </div>
+            <div class="modal-body">
+                <p id="txtCityZipCodeModalMsg"></p>
+                <div class="text-center">
+                    <input type="button" data-dismiss="modal" class="btn " value="Ok" onclick="javascript: $('#txtCityZipCodeModal').modal('hide');">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+            
+
+
+
+            
+
+
+
+<input type="hidden" id="refreshed" value="no">
+<div class="menu-main" ui-view="main"></div>
+<input type="hidden" id="userName">
+
+
+
+
+
+        </div>
+
+    </main>
+
+
+    <!--Desktop Footer Start-->
+    <footer class="footerarea  ">
+        <div class="container">
+
+            
+
+<div class="mobile-menu-footer">
+    <input type="hidden" id="serverid" value="5">
+    <a href="javascript:void(0);" class="close-footer d-md-none"><i class="icon icon-close"></i></a>
+    <div class="auth-link d-md-none">
+        Welcome
+            <span>Guest!</span>
+
+    </div>
+    <div class="accordion  " id="accordionExample">
+        <div class="footer-content card">
+            <div class="card-header">
+                <h4>
+                    Our Story
+                </h4>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>
+                        <a href="/ourtaste/ourfood" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA" data-gtm-event-action="Our Food">Our Food</a>
+                    </li>
+                    <li>
+                        <a href="/ourtaste/know-our-chicken" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Our Taste">Our Taste</a>
+                    </li>
+                    <li>
+                        <a href="/nutritionalcalculator" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Nutritional Calculator">Nutritional Calculator</a>
+
+                    </li>
+                    <li>
+                        <a href="/allergens" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Allergens Statement">Allergens Statement</a>
+
+                    </li>
+                    <li>
+                        <a href="/giftcard" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Digital Gift Cards">Digital Gift Cards</a>
+
+                    </li>
+
+                    
+
+                </ul>
+            </div>
+        </div>
+        <div class="footer-content card">
+            <div class="card-header">
+                <h4>
+                    Contact
+                </h4>
+            </div>
+
+            <div class="card-body">
+
+                <ul>
+                    <li>
+                        <a href="/ourstory/contact" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Contact Us">Contact Us</a>
+                    </li>
+                    <li>
+                        <a href="/FAQs" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Contact Us">Frequently Asked Questions</a>
+                    </li>
+                    <li>
+                        <a href="/goldenbucket" onclick="window.location.href='/goldenbucket'" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Our Blog">Our Blog</a>
+
+                    </li>
+                    <li>
+                        <a href="/addhope" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Add Hope">Add Hope</a>
+
+                    </li>
+                    <li>
+                        <a href="/minicricket/minicrickethome" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Mini-Cricket">Mini-Cricket</a>
+
+                    </li>
+
+                    <li>
+                        <a href="https://kfcjobs.mcidirecthire.com" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Careers">Careers</a>
+                    </li>
+                    
+
+                </ul>
+            </div>
+
+        </div>
+        <div class="footer-content card">
+            <div class="card-header">
+
+                <h4>
+                    Our Restaurants
+                </h4>
+
+            </div>
+
+            <div class="card-body">
+
+                <ul>
+                    <li>
+                        <a href="/ourrestaurants" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Find a restaurant">Find a restaurant</a>
+
+                    </li>
+                    <li>
+                        <a href="/generator" class="hidden" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Restaurants with generators">Restaurants with generators</a>
+
+                    </li>
+
+                    <li>
+                        <a href="/kfc-listens" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Talk 2 Us – Guest Survey">Talk 2 Us – Guest Survey</a>
+                    </li>
+                    <li>
+                        <a href="/ordertracker" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Track Your Order">Track Your Order</a>
+
+                    </li>
+
+                    <li>
+                        <a href="/ourstory/colonelspromise" class="hidden" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Colonel’s Promise">Colonel’s Promise</a>
+
+                    </li>
+                    <li>
+                        <a href="https://www.sacoronavirus.co.za" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="COVID-19 Online Resource & News Portal">COVID-19 Online Resource & News Portal</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="footer-content card">
+            <div class="card-header">
+
+                <h4>
+
+                    More ways to get KFC
+
+                </h4>
+            </div>
+
+            <div class="card-body">
+
+                <ul>
+                    <li>
+                        <a href="/delivery" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Mr. D.">Mr. D.</a>
+
+                    </li>
+                    <li>
+                        <a href="/delivery" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Uber Eats">Uber Eats</a>
+
+                    </li>
+                    <li>
+                        <a href="/delivery" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Telephone Orders">Telephone Orders</a>
+                    </li>
+
+                    <li>
+                        <a href="/Content/PDF/31674_Delivery_14_July_2020_Leaflet.pdf" target="_blank" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Delivery Menu">Delivery Menu</a>
+
+                    </li>
+                    <li>
+                        <a href="/WhatsApp" target="_self" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="WhatsApp">WhatsApp</a>
+
+                    </li>
+
+                </ul>
+
+
+            </div>
+        </div>
+    </div>
+    <div class="social-link-wrap">
+        <!--Desktop Social Media Links Start-->
+        <div class="row">
+            <div class="col-md-8  order-md-2 footer-text ">
+                <ul>
+                    
+                    <li>
+                        <a href="/cookiesandads" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Cookies and Ads">Cookies and Ads</a>
+                    </li>
+                    <li>
+                        <a href="/termsandconditions" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Terms and Conditions">Terms and Conditions</a>
+                    </li>
+                    <li>
+                        <a href="/privacy" data-gtm-click-event-tracker="false" data-gtm-event-name="navigationPane" data-gtm-event-category="Nav Pane Interaction" data-gtm-event-label="GBL_ZA"
+                           data-gtm-event-action="Privacy Policy">Privacy Policy</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-4 order-md-1"> 
+
+<a href="https://www.facebook.com/KFCSA" target="_blank">
+    <i class="icon icon-facebook">
+    </i>
+</a>
+<a href="https://instagram.com/kfcsouthafrica/" target="_blank">
+    <i class="icon icon-instagram">
+    </i>
+</a>
+
+<a href="https://twitter.com/kfcsa" target="_blank">
+    <i class="icon icon-twitter">
+    </i>
+</a>
+
+<a href="https://www.youtube.com/user/KFCsouthafrica" target="_blank">
+    <i class="icon icon-youtube"></i>
+</a>
+
+<a href="https://bit.ly/3wEJAkt" target="_blank">
+    <i class="icon icon-whatsapp"></i>
+</a>
+
+
+</div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+    </footer>
+    <div class="mobile-app">
+    <ul>
+        <li id="nav-deals" class="active"><a href="/menu/deals"><i class="icon icon-app-Deals"></i> Deals</a></li>
+        <li id="nav-menu"><a href="/menu/just-for-me"><i class="icon icon-app-menu"></i> Menu</a></li>
+        <li id="nav-cart"><a href="/menu/my-cart"> <i class="icon icon-app-cart"><span class="hidden" id="mobileCartQuantity"></span></i> Cart</a></li>
+        <li id="nav-account"><a href="/myaccount"><i class="icon icon-app-account"></i> Account</a></li>
+        <li><a href="javascript:void(0);" data-toggle="offcanvas"><i class="icon icon-app-more"></i> More</a></li>
+    </ul>
+    <div class="offcanvas-collapse">
+        <div class="clearfix">
+            <a href="javascript:void(0);" data-toggle="offcanvasclose" class="float-right"><i class="icon icon-close-modal"></i></a></a>
+        </div>
+        <ul>
+            <li class="active">
+                <a href="/ordertracker">Track Your Order</a>
+            </li>
+            <li>
+                <a href="/giftcard">Digital gift cards</a>
+            </li>
+            <li>
+                <a href="/ourstory/contact">contact us</a>
+            </li>
+            <li>
+                <a href="/ourrestaurants">Find a restaurant</a>
+            </li>
+            </ul>
+    </div>
+</div>
+    <div class="modal" id="modalConfirmation">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <a href="javascript:void(0);" class="close" data-dismiss="modal"><i class="icon icon-close-modal"></i></a>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body text-center">
+                    <h6 class="mb-2"></h6>
+                    <p class="mb-1"></p>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <a href="javascript:void(0);" class="btn" data-dismiss="modal">Ok</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <!--Desktop Footer End-->
+    <!--Links and Scripts Start-->
+    
+
+
+
+<script src="/bundles/commonjsmenu?v=hujoHxK1UCTG-upShIrkrJpANPtff2n2Ix-6i0Lr4Gg1"></script>
+
+
+
+
+
+
+<script>
+    //function openCloseHam() {
+    //    $(".ham-menu").toggleClass("open");
+    //};
+
+    //$(document).ready(function () {
+    //    $(".menu-row").find("a").click(function () {
+    //        if ($(this).attr("href") == "#") {
+    //            if ($(this).parent().hasClass("active")) {
+    //                $(this).siblings('ul').slideUp();
+    //                $(this).closest("ul").find("li").removeClass("active");
+    //            } else {
+    //                $(this).closest("ul").find("ul").slideUp();
+    //                $(this).siblings('ul').slideDown();
+    //                $(this).closest("ul").find("li").removeClass("active");
+    //                $(this).parent().addClass("active");
+    //            }
+    //        }
+    //    });
+    //});
+    function ShowSavedAddress(flag) {
+
+        if (flag) {
+            //localStorage.removeItem("registeredUserSaveArress");
+            localStorage.setItem("registeredUserSaveArress", "Yes");
+            window.location.href = '/store-selection';
+        } else {
+            //localStorage.removeItem("registeredUserSaveArress");
+            localStorage.setItem("registeredUserSaveArress", "No");
+            $('#openSavedAddressModal').removeClass('open');
+            //window.location.href = '/menu';
+        }
+        //Android.useMyLocation("Use my location clicked");
+    }
+    function ShowSavedStore(flag) {
+
+        if (flag) {
+            //localStorage.removeItem("registeredUserSaveArress");
+            //localStorage.setItem("registeredUserSaveArress", "Yes");
+            window.location.href = '/store-selection';
+        } else {
+            //localStorage.removeItem("registeredUserSaveArress");
+            //localStorage.setItem("registeredUserSaveArress", "No");
+            $('#openSavedStoreModal').removeClass('open');
+            //window.location.href = '/menu';
+        }
+        //Android.useMyLocation("Use my location clicked");
+    }
+    function StartMyOrder() {
+        Android.useMyLocation("Use my location clicked");
+    }
+    function start(element) {
+        Android.showToast("Sign in clicked");
+
+    }
+</script>
+
+
+
+
+
+
+    <!--Links and Scripts End-->
+    <!-- -------------OSERV-14778---------- -->
+    
+
+
+
+<script>
+    //-------OSERV-17342----Start-------
+    $('#failedAccessModal').on('shown.bs.modal', function () {
+        pushDataLayerPopup('Delivery Not Available');
+    });
+
+    $('#riderUnavailableAccessModal').on('shown.bs.modal', function () {
+        pushDataLayerPopup('Delivery - Rider Not Available');
+    });
+
+    $(document).on('click', '#findkfcbtn', function () {
+        var self = $(this);
+        var pushObj = {
+            event: 'findStore',
+            eventCategory: 'Find Store',
+            eventLabel: 'GBL_ZA',
+            eventAction: 'Click'
+        };
+        dataLayer.push(pushObj);
+    })
+
+    $(document).on('click', '.menu-main slick a', function () {
+        var self = $(this);
+        var pushObj = {
+            event: 'bannerClick',
+            eventCategory: 'Banner Interaction',
+            eventLabel: 'GBL_ZA',
+            eventAction: self.attr('href')//'document.url'
+        };
+        dataLayer.push(pushObj);
+    })
+
+    $(document).on('click', '.footer-content a', function () {
+        var self = $(this);
+        var devicename = GetDeviceName();
+        if (devicename == "desktop") {
+            var gtmEventAction = $(self).data('gtm-event-action');
+            var pushObj = {
+                event: 'footerInteraction',
+                eventCategory: 'Footer',
+                eventLabel: 'GBL_ZA',
+                eventAction: gtmEventAction//'Item clicked'
+            };
+        } else {
+            var gtmEventAction = $(self).data('gtm-event-action');
+            var gtmEventLabel = $(self).data('gtm-event-label');
+            var pushObj = {
+                event: 'navigationPane',
+                eventCategory: 'Nav Pane Interaction',
+                eventLabel: 'GBL_ZA',
+                eventAction: gtmEventAction
+            };
+        }
+        dataLayer.push(pushObj);
+    })
+    //-------OSERV-17342----End-------
+
+
+    $(document).on('click', '[data-gtm-click-event-tracker="true"]', function () {
+        var self = $(this);
+        //------OSERV-17342----Start----
+        var gtmEventName = $(self).data('gtm-event-name');
+        var gtmEventAction = $(self).data('gtm-event-action');
+        var gtmEventLabel = $(self).data('gtm-event-label');
+        var gtmEventCategory = $(self).data('gtm-event-category');
+        var gtmcd_postLocalisation = $(self).data('gtm-event-cd_postLocalisation');
+        var gtmcd_userType = $(self).data('gtm-event-cd_userType');
+        var gtmcd_userType = $(self).data('gtm-event-cd_userType');
+        var gtmcd_loggedIn = $(self).data('gtm-event-cd_loggedIn');
+        var gtmcd_loggedInType = $(self).data('gtm-event-cd_loggedInType');
+        var gtmcd_reorder = $(self).data('gtm-event-cd_reorder');
+
+        var pushObj = {};
+        pushObj.event = gtmEventName;
+        pushObj.eventAction = gtmEventAction;
+        if (gtmEventLabel) { pushObj.eventLabel = gtmEventLabel; }
+        if (gtmEventCategory) { pushObj.eventCategory = gtmEventCategory; }
+        if (gtmcd_postLocalisation) { pushObj.cd_postLocalisation = (gtmcd_postLocalisation == "true") ? true : false; }
+        if (gtmcd_userType) { pushObj.cd_userType = gtmcd_userType; }
+        if (gtmcd_loggedIn) { pushObj.cd_loggedIn = gtmcd_loggedIn; }
+        if (gtmcd_loggedInType) { pushObj.cd_loggedInType = gtmcd_loggedInType; }
+        if (gtmcd_reorder) { pushObj.cd_reorder = (gtmcd_reorder == "true") ? true : false; }
+
+
+        if (gtmEventName) {
+            try {
+                if (gtmEventName == "navigationPane") {
+                    if (document.URL.endsWith("/menu")) {
+                        dataLayer.push(pushObj);
+                        //console.log("dataLayer",dataLayer);
+                    }
+                } else {
+                    dataLayer.push(pushObj);
+                    //console.log("dataLayer",dataLayer);
+                }
+                //------OSERV-17342----End----
+
+                //if (gtmEventLabel) {
+                //    dataLayer.push({
+                //        'event': gtmEventName,
+                //        'eventAction': gtmEventAction,
+                //        'eventLabel': gtmEventLabel
+                //    });
+                //}
+                //else {
+                //    dataLayer.push({
+                //        'event': gtmEventName,
+                //        'eventAction': gtmEventAction
+                //    });
+                //}
+            }
+            catch (err) {
+            }
+        }
+    });
+</script>
+
+
+
+<!--Push custom dimension values-->
+
+<input id="RegisteredUserID" name="RegisteredUserID" type="hidden" value="" />
+<script>
+    function GetDeviceType() {
+        if (navigator.userAgent.match(/Android/i)
+            || navigator.userAgent.match(/webOS/i)
+            || navigator.userAgent.match(/iPhone/i)
+            || navigator.userAgent.match(/iPad/i)
+            || navigator.userAgent.match(/iPod/i)
+            || navigator.userAgent.match(/BlackBerry/i)
+            || navigator.userAgent.match(/Windows Phone/i)
+        ) {
+            return "Mobile";
+        }
+        else {
+            return "Desktop";
+        }
+    }
+    var deviceType = GetDeviceType();
+    var orderSource = 'False' == 'True' ? '' : deviceType;
+    var currentLocation = window.location.href;
+
+    if ('None' != 'None' && 'None' =='Pickup') {
+        dataLayer.push({
+            'event': 'set-custom dimension',
+            'cd_storeID': '',
+            'cd_disposition': 'None',
+            'cd_userType': 'Guest',
+            'language': 'en-US',
+            'cd_futureOrder': 'True',
+            'cd_reorder': 'False',
+            'favouriteOrder': 'False',
+            'countofproductssold': '',
+            'requesttime': '',
+            'deliveryinitialpromisetime': '',
+            'deliveryfinalpromisetime': '',
+            'cd_loggedIn': 'False',
+            'cd_loggedInType': '',
+            'voucherCode': '',
+            
+            'cd_paymentMethod': 'None',
+            'rewardsAvailable': '',
+            'cd_userID': '',
+            'orderSource': orderSource,
+            'CollectionPoint': 'None',
+            'cd_postLocalisation': 'False',
+            'cd_pageURL': currentLocation
+        });
+        dataLayer.push({ 'ecommerce': undefined });
+    }
+    else {
+            dataLayer.push({
+            'event': 'set-custom dimension',
+            'cd_storeID': '',
+            'cd_disposition': 'None',
+            'cd_userType': 'Guest',
+            'language': 'en-US',
+            'cd_futureOrder': 'True',
+            'cd_reorder': 'False',
+            'favouriteOrder': 'False',
+            'countofproductssold': '',
+            'requesttime': '',
+            'deliveryinitialpromisetime': '',
+            'deliveryfinalpromisetime': '',
+            'cd_loggedIn': 'False',
+            'cd_loggedInType': '',
+            'voucherCode': '',
+            
+            'cd_paymentMethod': 'None',
+            'rewardsAvailable': '',
+            'cd_userID': '',
+            'orderSource': orderSource,
+            'cd_postLocalisation': 'False',
+            'cd_pageURL': currentLocation
+        });
+        dataLayer.push({ 'ecommerce': undefined });
+    }
+</script>
+    
+    
+    
+    
+ 
+
+    
+    <script src="/bundles/menujs?v=3V-Kxp3xzPtIoA8WBTYQyaAvsUnr-v2zct7My7O_a-M1"></script>
+
+	 <script src="https://rawgit.com/rzajac/angularjs-slider/master/dist/rzslider.js"></script>
+    
+
+
+
+
+
+    <div class="modal fade" id="locationDialog" data-backdrop="true" data-keyboard="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content modalprop">
+                <div class="modal-body">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="landscape-orientation">
+        Our website is designed to work in portrait mode.<br />Kindly rotate your device.
+        <div class="landscape-orientation-img">
+
+        </div>
+    </div>
+
+    
+
+    <div class="modal" id="deliveryAddressChange">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <!-- Modal body -->
+                <div class="modal-body mt-4">
+                    <p>Are you sure you want to change your address? You will have to restart your order?</p>
+                    <div class="text-center">
+                        <span>
+                            <button onclick="ShowSavedAddress(true)" class="btn ">Ok</button>
+                        </span>
+                        <span>
+                            <button onclick="hideDeliveryAddressChange()" class="btn white ">Cancel</button>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                
+
+            </div>
+        </div>
+    </div>
+
+
+    <!--OSERV-14778 START-->
+    <div class="modal" id="modalEmailVerified">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+
+                    <button type="button" class="close modal-close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body mt-4">
+
+                    <div class="text-center">
+                        <p id="email_verified_content" style="font-size:20px;color:#e4002b;">Your email is successfully verified</p>
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    &nbsp;
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="hidEmailVerified" value="" />
+    <!--OSERV-14778 END-->
+
+
+
+
+
+
+
+<!-- A80 - Win-back journey popup - OSERV-24048 -->
+    <div class="modal" id="modalWinBack">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal body -->
+                <div class="modal-body text-center">
+                    <h3>Welcome Back!</h3>
+                    <p class="store-btn">We’re constantly adding new and exciting items to the menu to go along with your old favorites. Choose your option to collect or deliver.</p>
+					 <p class="hidden menu-btn">We’re constantly adding new and exciting items to the menu to go along with your old favorites. Why not see them now?</p>
+                    <a href="/store-selection" class="btn store-btn" data-dismiss="modal">Collect</a>
+                    <a href="/store-selection?tab=delivery" class="btn store-btn" data-dismiss="modal">Delivery</a>
+                    <a href="/menu" class="btn hidden menu-btn" data-dismiss="modal">    Take me to the menu</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- A80 - Win-back journey popup - OSERV-24048 -->
+
+<script type="text/javascript"  src="/6qdG6J/0Svt2J/hI63a/nZanx/WVR1s/iO1bNSbG/H0YtIFFvSg/WjJCfR5/pLXU"></script></body>
+</html>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        //--------OSERV-14778 --------------
+        if ($('#hidEmailVerified').val() == "email_verified" || $('#hidEmailVerified').val() == "email_already_verified") {
+            $('#modalEmailVerified').show();
+            if ($('#hidEmailVerified').val() == "email_verified") {
+                // $('#email_verified_content').html("Your email is successfully verified");
+            }
+            if ($('#hidEmailVerified').val() == "email_already_verified") {
+                // $('#email_verified_content').html("Your email is already verified");
+            }
+        }
+
+
+        //$(document).on('input', '#txtTrackMob', function (event) {
+        //    var phone = $('#txtTrackMob').val();
+        //    var regex = new RegExp(/^0[0-9]*$/);
+        //    if (!regex.test(phone)) {
+        //        phone = phone.substr(0, (phone.length - 1));
+        //        $('#txtTrackMob').val(phone);
+        //        $('#zerovalidation-error').show();
+        //        event.preventDefault();
+        //        event.stopPropagation();
+        //        return false;
+        //    } else {
+        //        $('#zerovalidation-error').hide();
+        //    }
+        //});
+        //var isFeedPopup = sessionStorage.getItem("IsFavKfcPopUp");
+
+        var isFeedPopup = localStorage.getItem("IsFavKfcPopUp");
+        $('#myModal').hide();
+        if (isFeedPopup !== 'NO') {
+            var path = $(location).attr("href");
+            if (path === 'https://order.kfc.co.za/menu/just-for-me') {
+                $('#myModal').show();
+            }
+        } else {
+            $('#myModal').hide();
+        }
+
+
+
+        //var isLocationPopup = sessionStorage.getItem("isLocationPopup");
+
+        //if (isLocationPopup == null || isLocationPopup !== 'NO') {
+        //    //DisposeStorePopUp();
+        //    var path = $(location).attr("href");
+        //    if ((path === 'http://localhost:4043/menu/just-for-me') || (path === 'http://localhost:4043/menu/for-sharing') ||
+        //        (path === 'http://localhost:4043/menu/deals')) {
+        //        if ($('#modalStoreSelection').length > 0) {
+        //            $('#RestaurantSearchKeyword').val('');
+        //            showDeliverySearchHome(2);
+        //            $('#modalStoreSelection').show();
+        //            modalOpen();
+        //        }
+        //    }
+        //}
+        //else {show()
+        //    if ($('#modalStoreSelection').length > 0) {
+        //        $('#modalStoreSelection').hide();
+        //        modalClose();
+        //    }
+        //}
+        if ($('#DuplicateModal').length > 0) {
+            $('#DuplicateModal').show();
+        }
+
+
+        if ($('#modalSystemError').length > 0) {
+            $('#modalSystemError').show();
+        }
+
+		  $(document).on('click', '.modal-close', function (event) {
+					var _this = $(this);   
+					_this.closest("div.modal").hide();
+				});
+		
+    });
+
+
+
+</script>
+
