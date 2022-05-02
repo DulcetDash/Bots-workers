@@ -138,24 +138,17 @@ def getProductsFor(link, category, shop_name, website_link, subcategory):
                     collection_catalogue = db['catalogue_central']
 
                     #? DONE - save
-                    #! Block duplicate
-                    checkUnicity = collection_catalogue.find({
-                        'brand': brand,
+                    #! filter
+                    filterProduct = {
+                        'brand': _SHOP_NAME_,
                         'product_name': product_name,
-                        'product_price': product_price,
-                        'product_picture': product_picture,
-                        'sku': sku,
-                        'meta.category': category,
-                        'meta.subcategory': subcategory,
-                        'meta.shop_name': shop_name
-                    })
-
-                    if checkUnicity.count() <= 0: #?new
-                        print(TMP_DATA_MODEL)
-                        display_log(Fore.GREEN, 'Saving the product model in catalogue')
-                        collection_catalogue.insert_one(TMP_DATA_MODEL)
-                    else: #! Already added
-                        display_log(Fore.RED, 'This product was already processed.')
+                        'meta.category': str(category).upper().strip(),
+                        'meta.subcategory': str(category).upper().strip(),
+                        'meta.shop_name': _SHOP_NAME_
+                    }
+                    print(TMP_DATA_MODEL)
+                    display_log(Fore.GREEN, 'Saving the product model in catalogue')
+                    collection_catalogue.update_one(filterProduct, {"$set": TMP_DATA_MODEL}, upsert=True)
                 except Exception as e:
                     print(e)
 

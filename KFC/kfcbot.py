@@ -122,25 +122,17 @@ def launchBot():
                         'date_added':  datetime.datetime.today().replace(microsecond=0)
                     }
 
-                    #! Avoid non duplicata
-                    checkUnicity = collection_catalogue.find({
+                    #! filter
+                    filterProduct = {
                         'brand': _SHOP_NAME_,
                         'product_name': meal_name,
-                        'product_price': meal_price,
-                        'product_picture': meal_picture,
-                        'sku': str(meal_name).upper(),
                         'meta.category': str(category).upper().strip(),
                         'meta.subcategory': str(category).upper().strip(),
                         'meta.shop_name': _SHOP_NAME_
-                    })
-
-                    if checkUnicity.count() <= 0: #?new
-                        print(TMP_DATA_MODEL)
-                        display_log(Fore.GREEN, 'Saving the product model in catalogue')
-                        collection_catalogue.insert_one(TMP_DATA_MODEL)
-                        print(TMP_DATA_MODEL)
-                    else: #! Already added
-                        display_log(Fore.RED, 'This product was already processed.')
+                    }
+                    print(TMP_DATA_MODEL)
+                    display_log(Fore.GREEN, 'Saving the product model in catalogue')
+                    collection_catalogue.update_one(filterProduct, {"$set": TMP_DATA_MODEL}, upsert=True)
                 print('----------')
             else:
                 display_log(Fore.RED, 'Unauthorised package [{}]'.format(category))
