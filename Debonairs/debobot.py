@@ -222,9 +222,18 @@ def launchBot():
                                 'meta.subcategory': str(category).upper().strip(),
                                 'meta.shop_name': _SHOP_NAME_
                             }
-                            print(TMP_DATA_MODEL)
-                            display_log(Fore.GREEN, 'Saving the product model in catalogue')
-                            collection_catalogue.update_one(filterProduct, {"$set": TMP_DATA_MODEL}, upsert=True)
+                            
+                            checkExistense = collection_catalogue.find(filterProduct)
+
+                            if checkExistense.count() > 0: #Exists
+                                #update
+                                print(TMP_DATA_MODEL)
+                                display_log(Fore.LIGHTBLUE_EX, 'Updating the product model in catalogue')
+                                collection_catalogue.update_one(filterProduct, {"$set": {'product_price': TMP_DATA_MODEL['product_price']}})
+                            else: #no records yet
+                                print(TMP_DATA_MODEL)
+                                display_log(Fore.GREEN, 'Saving the product model in catalogue')
+                                collection_catalogue.update_one(filterProduct, {"$set": TMP_DATA_MODEL}, upsert=True)
                         print('----------')
 
                     else:
@@ -301,9 +310,18 @@ def launchBot():
                                     'meta.subcategory': str(category).upper().strip(),
                                     'meta.shop_name': _SHOP_NAME_
                                 }
-                                print(TMP_DATA_MODEL)
-                                display_log(Fore.GREEN, 'Saving the product model in catalogue')
-                                collection_catalogue.update_one(filterProduct, {"$set": TMP_DATA_MODEL}, upsert=True)
+                                
+                                checkExistense = collection_catalogue.find(filterProduct)
+
+                                if checkExistense.count() > 0: #Exists
+                                    #update
+                                    print(TMP_DATA_MODEL)
+                                    display_log(Fore.LIGHTBLUE_EX, 'Updating the product model in catalogue')
+                                    collection_catalogue.update_one(filterProduct, {"$set": {'product_price': TMP_DATA_MODEL['product_price']}})
+                                else: #no records yet
+                                    print(TMP_DATA_MODEL)
+                                    display_log(Fore.GREEN, 'Saving the product model in catalogue')
+                                    collection_catalogue.update_one(filterProduct, {"$set": TMP_DATA_MODEL}, upsert=True)
                             print('----------')
 
                         #! Keep going with the item number - crucial
@@ -395,9 +413,18 @@ def launchBot():
                                     'meta.subcategory': str(category).upper().strip(),
                                     'meta.shop_name': _SHOP_NAME_
                                 }
-                                print(TMP_DATA_MODEL)
-                                display_log(Fore.GREEN, 'Saving the product model in catalogue')
-                                collection_catalogue.update_one(filterProduct, {"$set": TMP_DATA_MODEL}, upsert=True)
+                                
+                                checkExistense = collection_catalogue.find(filterProduct)
+
+                                if checkExistense.count() > 0: #Exists
+                                    #update
+                                    print(TMP_DATA_MODEL)
+                                    display_log(Fore.LIGHTBLUE_EX, 'Updating the product model in catalogue')
+                                    collection_catalogue.update_one(filterProduct, {"$set": {'product_price': TMP_DATA_MODEL['product_price']}})
+                                else: #no records yet
+                                    print(TMP_DATA_MODEL)
+                                    display_log(Fore.GREEN, 'Saving the product model in catalogue')
+                                    collection_catalogue.update_one(filterProduct, {"$set": TMP_DATA_MODEL}, upsert=True)
                             print('----------')
 
                         #! Keep going with the item number - crucial
