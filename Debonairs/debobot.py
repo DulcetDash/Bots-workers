@@ -24,6 +24,11 @@ import datetime
 from scrapingant_client import ScrapingAntClient
 import http.client
 import json
+import boto3
+from boto3.dynamodb.conditions import Key, Attr
+import uuid
+
+dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:8000')
 
 conn = http.client.HTTPSConnection("api.scrapingant.com")
 
@@ -58,11 +63,8 @@ def launchBot():
     _INDEX_START_MENU_ITEM_ = 55553
 
     try:
-        client = MongoClient(
-                    'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false')
-
-        db = client.NEJ
-        collection_catalogue = db['catalogue_central']
+        collection_catalogue = dynamodb.Table('catalogue_central')
+        shop_fp = 'debonairs97639807992322'
 
 
         payload = "{ \"url\": \"https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall\"}"
@@ -192,6 +194,8 @@ def launchBot():
                             #? SAVE in the db
                             #Compile the whole product data model
                             TMP_DATA_MODEL = {
+                                '_id': str(uuid.uuid4()),
+                                'shop_fp': shop_fp,
                                 'brand': _SHOP_NAME_,
                                 'product_name': name,
                                 'product_price': pizza_price,
@@ -214,26 +218,43 @@ def launchBot():
                                 'date_added':  datetime.datetime.today().replace(microsecond=0)
                             }
 
-                            #! filter
-                            filterProduct = {
-                                'brand': _SHOP_NAME_,
-                                'product_name': name,
-                                'meta.category': str(category).upper().strip(),
-                                'meta.subcategory': str(category).upper().strip(),
-                                'meta.shop_name': _SHOP_NAME_
-                            }
-                            
-                            checkExistense = collection_catalogue.find(filterProduct)
+                            #? 1. Check if the item was already catalogued
+                            ipoItemCatalogued = collection_catalogue.query(
+                                IndexName='sku-index',
+                                KeyConditionExpression=Key('sku').eq(TMP_DATA_MODEL['sku']),
+                                FilterExpression=Attr('product_name').eq(TMP_DATA_MODEL['product_name'])
+                            )['Items']
 
-                            if checkExistense.count() > 0: #Exists
-                                #update
+                            
+                            if len(ipoItemCatalogued)>0:    #? Item was already catalogued
+                                ipoItemCatalogued = ipoItemCatalogued[0]
+                                #? 2. Prices already updated
+                                #? 3. Merge and unify the product pictures
+                                #! Fix incorrect [[image_link]] format to [image_link]
+                                TMP_DATA_MODEL['product_picture'] = TMP_DATA_MODEL['product_picture'] if isinstance(TMP_DATA_MODEL['product_picture'][0], str) else TMP_DATA_MODEL['product_picture'][0]
+                                #!---
+                                TMP_DATA_MODEL['product_picture'] += ipoItemCatalogued['product_picture']
+                                TMP_DATA_MODEL['product_picture'] = list(dict.fromkeys(TMP_DATA_MODEL['product_picture']))
+                                #? 4. Update the date updated
+                                TMP_DATA_MODEL['date_updated'] = TMP_DATA_MODEL['date_added']
+                                TMP_DATA_MODEL['date_added'] = ipoItemCatalogued['date_added']
+                                #! Keep the same _id
+                                TMP_DATA_MODEL['_id'] = ipoItemCatalogued['_id']
+
+                                #? SAVE
+                                collection_catalogue.put_item(
+                                    Item=TMP_DATA_MODEL
+                                )
+                                display_log(Fore.YELLOW,'Item updated - {}'.format(TMP_DATA_MODEL['sku']))
                                 print(TMP_DATA_MODEL)
-                                display_log(Fore.LIGHTBLUE_EX, 'Updating the product model in catalogue')
-                                collection_catalogue.update_one(filterProduct, {"$set": {'product_price': TMP_DATA_MODEL['product_price']}})
-                            else: #no records yet
+                            
+
+                            else:   #? New item
+                                display_log(Fore.YELLOW,'New item detected - {}'.format(TMP_DATA_MODEL['sku']))
+                                collection_catalogue.put_item(
+                                    Item=TMP_DATA_MODEL
+                                )
                                 print(TMP_DATA_MODEL)
-                                display_log(Fore.GREEN, 'Saving the product model in catalogue')
-                                collection_catalogue.update_one(filterProduct, {"$set": TMP_DATA_MODEL}, upsert=True)
                         print('----------')
 
                     else:
@@ -285,7 +306,9 @@ def launchBot():
                                 #? SAVE in the db
                                 #Compile the whole product data model
                                 TMP_DATA_MODEL = {
-                                'brand': _SHOP_NAME_,
+                                    '_id': str(uuid.uuid4()),
+                                    'shop_fp': shop_fp,
+                                    'brand': _SHOP_NAME_,
                                     'product_name': name,
                                     'product_price': pizza_price,
                                     'product_picture': pizza_image,
@@ -302,26 +325,43 @@ def launchBot():
                                     'date_added':  datetime.datetime.today().replace(microsecond=0)
                                 }
 
-                                #! filter
-                                filterProduct = {
-                                    'brand': _SHOP_NAME_,
-                                    'product_name': name,
-                                    'meta.category': str(category).upper().strip(),
-                                    'meta.subcategory': str(category).upper().strip(),
-                                    'meta.shop_name': _SHOP_NAME_
-                                }
-                                
-                                checkExistense = collection_catalogue.find(filterProduct)
+                                #? 1. Check if the item was already catalogued
+                                ipoItemCatalogued = collection_catalogue.query(
+                                    IndexName='sku-index',
+                                    KeyConditionExpression=Key('sku').eq(TMP_DATA_MODEL['sku']),
+                                    FilterExpression=Attr('product_name').eq(TMP_DATA_MODEL['product_name'])
+                                )['Items']
 
-                                if checkExistense.count() > 0: #Exists
-                                    #update
+                                
+                                if len(ipoItemCatalogued)>0:    #? Item was already catalogued
+                                    ipoItemCatalogued = ipoItemCatalogued[0]
+                                    #? 2. Prices already updated
+                                    #? 3. Merge and unify the product pictures
+                                    #! Fix incorrect [[image_link]] format to [image_link]
+                                    TMP_DATA_MODEL['product_picture'] = TMP_DATA_MODEL['product_picture'] if isinstance(TMP_DATA_MODEL['product_picture'][0], str) else TMP_DATA_MODEL['product_picture'][0]
+                                    #!---
+                                    TMP_DATA_MODEL['product_picture'] += ipoItemCatalogued['product_picture']
+                                    TMP_DATA_MODEL['product_picture'] = list(dict.fromkeys(TMP_DATA_MODEL['product_picture']))
+                                    #? 4. Update the date updated
+                                    TMP_DATA_MODEL['date_updated'] = TMP_DATA_MODEL['date_added']
+                                    TMP_DATA_MODEL['date_added'] = ipoItemCatalogued['date_added']
+                                    #! Keep the same _id
+                                    TMP_DATA_MODEL['_id'] = ipoItemCatalogued['_id']
+
+                                    #? SAVE
+                                    collection_catalogue.put_item(
+                                        Item=TMP_DATA_MODEL
+                                    )
+                                    display_log(Fore.YELLOW,'Item updated - {}'.format(TMP_DATA_MODEL['sku']))
                                     print(TMP_DATA_MODEL)
-                                    display_log(Fore.LIGHTBLUE_EX, 'Updating the product model in catalogue')
-                                    collection_catalogue.update_one(filterProduct, {"$set": {'product_price': TMP_DATA_MODEL['product_price']}})
-                                else: #no records yet
+                                
+
+                                else:   #? New item
+                                    display_log(Fore.YELLOW,'New item detected - {}'.format(TMP_DATA_MODEL['sku']))
+                                    collection_catalogue.put_item(
+                                        Item=TMP_DATA_MODEL
+                                    )
                                     print(TMP_DATA_MODEL)
-                                    display_log(Fore.GREEN, 'Saving the product model in catalogue')
-                                    collection_catalogue.update_one(filterProduct, {"$set": TMP_DATA_MODEL}, upsert=True)
                             print('----------')
 
                         #! Keep going with the item number - crucial
@@ -388,7 +428,9 @@ def launchBot():
                                 #? SAVE in the db
                                 #Compile the whole product data model
                                 TMP_DATA_MODEL = {
-                                'brand': _SHOP_NAME_,
+                                    '_id': str(uuid.uuid4()),
+                                    'shop_fp': shop_fp,
+                                    'brand': _SHOP_NAME_,
                                     'product_name': name,
                                     'product_price': pizza_price,
                                     'product_picture': pizza_image,
@@ -405,26 +447,43 @@ def launchBot():
                                     'date_added':  datetime.datetime.today().replace(microsecond=0)
                                 }
 
-                                #! filter
-                                filterProduct = {
-                                    'brand': _SHOP_NAME_,
-                                    'product_name': name,
-                                    'meta.category': str(category).upper().strip(),
-                                    'meta.subcategory': str(category).upper().strip(),
-                                    'meta.shop_name': _SHOP_NAME_
-                                }
-                                
-                                checkExistense = collection_catalogue.find(filterProduct)
+                                #? 1. Check if the item was already catalogued
+                                ipoItemCatalogued = collection_catalogue.query(
+                                    IndexName='sku-index',
+                                    KeyConditionExpression=Key('sku').eq(TMP_DATA_MODEL['sku']),
+                                    FilterExpression=Attr('product_name').eq(TMP_DATA_MODEL['product_name'])
+                                )['Items']
 
-                                if checkExistense.count() > 0: #Exists
-                                    #update
+                                
+                                if len(ipoItemCatalogued)>0:    #? Item was already catalogued
+                                    ipoItemCatalogued = ipoItemCatalogued[0]
+                                    #? 2. Prices already updated
+                                    #? 3. Merge and unify the product pictures
+                                    #! Fix incorrect [[image_link]] format to [image_link]
+                                    TMP_DATA_MODEL['product_picture'] = TMP_DATA_MODEL['product_picture'] if isinstance(TMP_DATA_MODEL['product_picture'][0], str) else TMP_DATA_MODEL['product_picture'][0]
+                                    #!---
+                                    TMP_DATA_MODEL['product_picture'] += ipoItemCatalogued['product_picture']
+                                    TMP_DATA_MODEL['product_picture'] = list(dict.fromkeys(TMP_DATA_MODEL['product_picture']))
+                                    #? 4. Update the date updated
+                                    TMP_DATA_MODEL['date_updated'] = TMP_DATA_MODEL['date_added']
+                                    TMP_DATA_MODEL['date_added'] = ipoItemCatalogued['date_added']
+                                    #! Keep the same _id
+                                    TMP_DATA_MODEL['_id'] = ipoItemCatalogued['_id']
+
+                                    #? SAVE
+                                    collection_catalogue.put_item(
+                                        Item=TMP_DATA_MODEL
+                                    )
+                                    display_log(Fore.YELLOW,'Item updated - {}'.format(TMP_DATA_MODEL['sku']))
                                     print(TMP_DATA_MODEL)
-                                    display_log(Fore.LIGHTBLUE_EX, 'Updating the product model in catalogue')
-                                    collection_catalogue.update_one(filterProduct, {"$set": {'product_price': TMP_DATA_MODEL['product_price']}})
-                                else: #no records yet
+                                
+
+                                else:   #? New item
+                                    display_log(Fore.YELLOW,'New item detected - {}'.format(TMP_DATA_MODEL['sku']))
+                                    collection_catalogue.put_item(
+                                        Item=TMP_DATA_MODEL
+                                    )
                                     print(TMP_DATA_MODEL)
-                                    display_log(Fore.GREEN, 'Saving the product model in catalogue')
-                                    collection_catalogue.update_one(filterProduct, {"$set": TMP_DATA_MODEL}, upsert=True)
                             print('----------')
 
                         #! Keep going with the item number - crucial
