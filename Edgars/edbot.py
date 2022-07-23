@@ -22,6 +22,7 @@ import datetime
 import uuid
 import SaveOrUpdateItem
 import json
+import GetUrlDocument
 
 
 driver = False
@@ -39,32 +40,30 @@ display_log(Fore.GREEN, 'ROBOT NAME: NEJ')
 display_log(Fore.GREEN, _SHOP_NAME_)
 
 
-def getHTMLDocument(url):
-    response = requests.get(url)
-    return response.text
-
-
 def launchBot():
-    os.system('clear')
-    link = 'https://www.edgars.co.za/'
+    try:
+        os.system('clear')
+        link = 'https://www.edgars.co.za/'
 
-    #1. Get the fashion's page
-    fashion_page = BeautifulSoup(getHTMLDocument(link + 'fashion'), 'html.parser')
-    #List all the subcategories for Fashion
-    main_categories = fashion_page.find_all("div", {"class":"pagebuilder-column"})
-    
-    display_log(Fore.BLUE, 'Finding store categories')
-    for i,element in enumerate(main_categories):
-        if element.div != None and element.div.strong != None:
-            category = str(element.div.strong.get_text()).replace('SHOP ', '').strip().upper()
-            tmpText = category.lower()
-            tmpLink = link + 'fashion/' + str(tmpText)
-            #---
-            display_log(Fore.CYAN, '{}. {}'.format(i+1, category))
-            #2. Open the sub categories links
-            tmpSouped = BeautifulSoup(getHTMLDocument(tmpLink), 'html.parser')
-            print(tmpLink)
-            openGeneral_subcategories(tmpSouped, category, _SHOP_NAME_, link)
+        #1. Get the fashion's page
+        fashion_page = BeautifulSoup(GetUrlDocument.getHTMLDocument(link + 'fashion'), 'html.parser')
+        #List all the subcategories for Fashion
+        main_categories = fashion_page.find_all("div", {"class":"pagebuilder-column"})
+        
+        display_log(Fore.BLUE, 'Finding store categories')
+        for i,element in enumerate(main_categories):
+            if element.div != None and element.div.strong != None:
+                category = str(element.div.strong.get_text()).replace('SHOP ', '').strip().upper()
+                tmpText = category.lower()
+                tmpLink = link + 'fashion/' + str(tmpText)
+                #---
+                display_log(Fore.CYAN, '{}. {}'.format(i+1, category))
+                #2. Open the sub categories links
+                tmpSouped = BeautifulSoup(GetUrlDocument.getHTMLDocument(tmpLink), 'html.parser')
+                print(tmpLink)
+                openGeneral_subcategories(tmpSouped, category, _SHOP_NAME_, link)
+    except:
+        launchBot()
 
 
 #? Get the subcategories
@@ -89,7 +88,7 @@ def openGeneral_subcategories(soupedPage, category, shop_name, website_link):
 
 #? Get the products
 def getProductsFor(link, category, shop_name, website_link, subcategory):
-    souped = BeautifulSoup(getHTMLDocument(link), 'html.parser')
+    souped = BeautifulSoup(GetUrlDocument.getHTMLDocument(link), 'html.parser')
     # all_products = souped.find_all('li', {"class":'item product product-item'})
 
     #Get the total data page
@@ -97,7 +96,7 @@ def getProductsFor(link, category, shop_name, website_link, subcategory):
     display_log(Fore.LIGHTYELLOW_EX, 'Found {} pages for this product'.format(data_page))
     for i in range(data_page):
         display_log(Fore.LIGHTYELLOW_EX, '[{}] {}'.format(i+1, link + '?p=' + str(i+1)))
-        soupedProducts = BeautifulSoup(getHTMLDocument(link + '?p=' + str(i+1)), 'html.parser')
+        soupedProducts = BeautifulSoup(GetUrlDocument.getHTMLDocument(link + '?p=' + str(i+1)), 'html.parser')
         all_products = soupedProducts.find_all('li', {"class":'item product product-item'})
         #Navigate through all the products
         for j, product in enumerate(all_products):
@@ -113,7 +112,7 @@ def getProductsFor(link, category, shop_name, website_link, subcategory):
                     product_price = str(product.find('span', {'data-price-type':'finalPrice'}).get_text()).strip()
                     #? Get additional pictures
                     display_log(Fore.MAGENTA, 'Getting product pictures')
-                    soupedTgProduct = BeautifulSoup(getHTMLDocument(prod_link), 'html.parser')
+                    soupedTgProduct = BeautifulSoup(GetUrlDocument.getHTMLDocument(prod_link), 'html.parser')
                     # product_picture = soupedTgProduct.find_all('div',{'class':'gallery-placeholder'})[0].img['src'] #! Take the main one for now
                     product_picture = []
                    
