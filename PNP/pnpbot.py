@@ -20,11 +20,9 @@ from colorama import Back, Fore, Style, init
 init()
 import datetime
 import urllib.parse
-import boto3
-from boto3.dynamodb.conditions import Key, Attr
 import uuid
 
-dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:8000')
+import SaveOrUpdateItem
 
 
 driver = False
@@ -48,8 +46,8 @@ def getHTMLDocument(url):
 
 
 def launchBot():
+    os.system('clear')
     try:
-        collection_catalogue = dynamodb.Table('catalogue_central')
         shop_fp = 'picknpay8837887322322'
 
         root_url = 'https://www.pnp.co.za'
@@ -65,18 +63,23 @@ def launchBot():
         for i, element in enumerate(main_categories):
             category = str(element.find('h4').get_text()).strip()
 
+            # if category!='Meat, Poultry & Seafood': #!DEBUG
+            #     continue
+
             #https://www.pnp.co.za/pnpstorefront/pnp/en/All-Products/Milk%2C-Dairy-%26-Eggs/c/milk-dairy-and-eggs-423144840?pageSize=72&q=%3Arelevance&show=Page#
             next_link = root_url + '/pnpstorefront/pnp/en/All-Products/'+ urllib.parse.quote(category) + str(element.find('a')['href']) +'?pageSize=72&q=%3Arelevance'
             #...
             display_log(Fore.CYAN, '{}. {}'.format(i+1, category))
+
             #Open the sub categories links
             category_essense = BeautifulSoup(getHTMLDocument(next_link), 'html.parser')
-            #Get the number of pages
-            if category_essense.find('div', {'class':'col-xs-12 col-sm-6 col-md-5 pagination-wrap'}).find('ul', {'class':'pagination'}) is not None:
-                pagination_parent = category_essense.find('div', {'class':'col-xs-12 col-sm-6 col-md-5 pagination-wrap'}).find('ul', {'class':'pagination'}).find_all('li')
-                pagination_parent.pop()
 
-                page_number = str(pagination_parent[len(pagination_parent)-1].get_text()).strip()
+            #Get the number of pages
+            if category_essense.find('div', {'class':'col-xs-12 col-sm-6 col-md-5 pagination-wrap'}).find('ul', {'class':'pagination'}) is not None or category_essense.find('div', {'class':'col-xs-12 col-sm-6 col-md-5 pagination-wrap'}) is not None:
+                pagination_parent = category_essense.find('div', {'class':'col-xs-12 col-sm-6 col-md-5 pagination-wrap'}).find('ul', {'class':'pagination'}).find_all('li') if category_essense.find('div', {'class':'col-xs-12 col-sm-6 col-md-5 pagination-wrap'}).find('ul', {'class':'pagination'}) is not None else []
+                if len(pagination_parent) > 0 : pagination_parent.pop()
+
+                page_number = 1 if category_essense.find('div', {'class':'col-xs-12 col-sm-6 col-md-5 pagination-wrap'}).find('ul', {'class':'pagination'}) is None else  str(pagination_parent[len(pagination_parent)-1].get_text()).strip()
 
                 display_log(Fore.BLUE, '-> Page number found {}'.format(page_number))
                 print('Iterate over all the products')
@@ -122,6 +125,16 @@ def launchBot():
                                 products_images_summary = products_images_summary[0] if isinstance(products_images_summary[0], list) else products_images_summary
                             except:
                                 print('Unarray list of images - All good!')
+                                products_images_summary = []
+                            
+                            #! Determine the sku
+                            sku = product_link
+                            try:
+                                sku = product_link.split('/')[len(product_link.split('/'))-1]
+                            except:
+                                print('Unable to determine the sku - fallback to product name')
+                                sku = product_name.replace(' ', '_').lower()
+
                             #Compile the whole product data model
                             TMP_DATA_MODEL = {
                                 '_id': str(uuid.uuid4()),
@@ -130,7 +143,7 @@ def launchBot():
                                 'product_name': product_name,
                                 'product_price': product_price,
                                 'product_picture': products_images_summary,
-                                'sku': product_link.split('/')[len(product_link.split('/'))-1],
+                                'sku': sku,
                                 'used_link': product_link,
                                 'meta': {
                                     'category': str(category).upper().strip(),
@@ -139,51 +152,19 @@ def launchBot():
                                     'website_link': root_url
                                 },
                                 'date_added':  datetime.datetime.today().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                'date_updated':  datetime.datetime.today().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
                             }
 
 
-                            #? 1. Check if the item was already catalogued
-                            ipoItemCatalogued = collection_catalogue.query(
-                                IndexName='sku-index',
-                                KeyConditionExpression=Key('sku').eq(TMP_DATA_MODEL['sku']),
-                                FilterExpression=Attr('product_name').eq(TMP_DATA_MODEL['product_name'])
-                            )['Items']
-
-                            
-                            if len(ipoItemCatalogued)>0:    #? Item was already catalogued
-                                ipoItemCatalogued = ipoItemCatalogued[0]
-                                #? 2. Prices already updated
-                                #? 3. Merge and unify the product pictures
-                                #! Fix incorrect [[image_link]] format to [image_link]
-                                TMP_DATA_MODEL['product_picture'] = TMP_DATA_MODEL['product_picture'] if isinstance(TMP_DATA_MODEL['product_picture'][0], str) else TMP_DATA_MODEL['product_picture'][0]
-                                #!---
-                                TMP_DATA_MODEL['product_picture'] += ipoItemCatalogued['product_picture']
-                                TMP_DATA_MODEL['product_picture'] = list(dict.fromkeys(TMP_DATA_MODEL['product_picture']))
-                                #? 4. Update the date updated
-                                TMP_DATA_MODEL['date_updated'] = TMP_DATA_MODEL['date_added']
-                                TMP_DATA_MODEL['date_added'] = ipoItemCatalogued['date_added']
-                                #! Keep the same _id
-                                TMP_DATA_MODEL['_id'] = ipoItemCatalogued['_id']
-
-                                #? SAVE
-                                collection_catalogue.put_item(
-                                    Item=TMP_DATA_MODEL
-                                )
-                                display_log(Fore.YELLOW,'Item updated - {}'.format(TMP_DATA_MODEL['sku']))
-                                print(TMP_DATA_MODEL)
-                            
-
-                            else:   #? New item
-                                display_log(Fore.YELLOW,'New item detected - {}'.format(TMP_DATA_MODEL['sku']))
-                                collection_catalogue.put_item(
-                                    Item=TMP_DATA_MODEL
-                                )
-                                print(TMP_DATA_MODEL)
+                            #?Save
+                            SaveOrUpdateItem.saveOrUpdateItem(TMP_DATA_MODEL=TMP_DATA_MODEL)
                         print('----------')
 
 
     except Exception as e:
         print(e)
+        print('Failure detected, relaunching the bot.')
+        launchBot()
 
 #! DEBUG
 launchBot()

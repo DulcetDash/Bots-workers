@@ -19,11 +19,9 @@ import requests
 from colorama import Back, Fore, Style, init
 init()
 import datetime
-import boto3
-from boto3.dynamodb.conditions import Key, Attr
 import uuid
-
-dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:8000')
+import SaveOrUpdateItem
+import json
 
 
 driver = False
@@ -47,6 +45,7 @@ def getHTMLDocument(url):
 
 
 def launchBot():
+    os.system('clear')
     link = 'https://www.edgars.co.za/'
 
     #1. Get the fashion's page
@@ -115,10 +114,35 @@ def getProductsFor(link, category, shop_name, website_link, subcategory):
                     #? Get additional pictures
                     display_log(Fore.MAGENTA, 'Getting product pictures')
                     soupedTgProduct = BeautifulSoup(getHTMLDocument(prod_link), 'html.parser')
-                    product_picture = soupedTgProduct.find_all('div',{'class':'gallery-placeholder'})[0].img['src'] #! Take the main one for now
+                    # product_picture = soupedTgProduct.find_all('div',{'class':'gallery-placeholder'})[0].img['src'] #! Take the main one for now
+                    product_picture = []
+                   
+                    image_data = json.loads(str(soupedTgProduct.find_all('div',{'class':'product media'})[0].select_one('script').contents[0]))
+                    image_data = image_data['[data-gallery-role=gallery-placeholder]']['mage/gallery/gallery']['data']
+                    
+                    for image in image_data:
+                        #Save the picture link
+                        product_picture.append(image['full'])
+
                     #Get the prodcut SKU
-                    sku = str(soupedTgProduct.find('td', {'data-th':'SKU'}).get_text()).strip()
+                    #! Determine the sku
+                    sku = prod_link
+
+                    try:
+                        sku = str(soupedTgProduct.find('td', {'data-th':'SKU'}).get_text()).strip()
+                    except:
+                        print('Unable to determine the sku - fallback to product name')
+                        sku = product_name.replace(' ', '_').lower()
+
+                    
+                    #Get the item size if any
+                    # product_size = soupedTgProduct.find_all('div', {'class':'product-options-wrapper'})[0].find_all('script')[1].text
+
+                    # print(product_size)
+
                     #Compile the whole product data model
+                    shop_fp = 'edgars7737887322322'
+
                     TMP_DATA_MODEL = {
                         '_id': str(uuid.uuid4()),
                         'shop_fp': shop_fp,
@@ -132,52 +156,17 @@ def getProductsFor(link, category, shop_name, website_link, subcategory):
                             'category': category,
                             'subcategory': subcategory,
                             'shop_name': shop_name,
-                            'website_link': website_link
+                            'website_link': website_link,
+                            'options': {}
                         },
-                        'date_added':  datetime.datetime.today().replace(microsecond=0)
+                        'date_added':  datetime.datetime.today().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        'date_updated':  datetime.datetime.today().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
                     }
 
-                
-                    collection_catalogue = dynamodb.Table('catalogue_central')
-                    shop_fp = 'edgars7737887322322'
 
-                    #? 1. Check if the item was already catalogued
-                    ipoItemCatalogued = collection_catalogue.query(
-                        IndexName='sku-index',
-                        KeyConditionExpression=Key('sku').eq(TMP_DATA_MODEL['sku']),
-                        FilterExpression=Attr('product_name').eq(TMP_DATA_MODEL['product_name'])
-                    )['Items']
-
-                            
-                    if len(ipoItemCatalogued)>0:    #? Item was already catalogued
-                        ipoItemCatalogued = ipoItemCatalogued[0]
-                        #? 2. Prices already updated
-                        #? 3. Merge and unify the product pictures
-                        #! Fix incorrect [[image_link]] format to [image_link]
-                        TMP_DATA_MODEL['product_picture'] = TMP_DATA_MODEL['product_picture'] if isinstance(TMP_DATA_MODEL['product_picture'][0], str) else TMP_DATA_MODEL['product_picture'][0]
-                        #!---
-                        TMP_DATA_MODEL['product_picture'] += ipoItemCatalogued['product_picture']
-                        TMP_DATA_MODEL['product_picture'] = list(dict.fromkeys(TMP_DATA_MODEL['product_picture']))
-                        #? 4. Update the date updated
-                        TMP_DATA_MODEL['date_updated'] = TMP_DATA_MODEL['date_added']
-                        TMP_DATA_MODEL['date_added'] = ipoItemCatalogued['date_added']
-                        #! Keep the same _id
-                        TMP_DATA_MODEL['_id'] = ipoItemCatalogued['_id']
-
-                        #? SAVE
-                        collection_catalogue.put_item(
-                            Item=TMP_DATA_MODEL
-                        )
-                        display_log(Fore.YELLOW,'Item updated - {}'.format(TMP_DATA_MODEL['sku']))
-                        print(TMP_DATA_MODEL)
-                            
-
-                    else:   #? New item
-                        display_log(Fore.YELLOW,'New item detected - {}'.format(TMP_DATA_MODEL['sku']))
-                        collection_catalogue.put_item(
-                            Item=TMP_DATA_MODEL
-                        )
-                        print(TMP_DATA_MODEL)
+                    #?Save
+                    SaveOrUpdateItem.saveOrUpdateItem(TMP_DATA_MODEL=TMP_DATA_MODEL)
+                    # print(TMP_DATA_MODEL)
                 except Exception as e:
                     print(e)
 
