@@ -15,6 +15,7 @@ def display_log(fore=Fore.GREEN, text=''):
 
 # Save or update items in dynamodb
 def saveOrUpdateItem(TMP_DATA_MODEL):
+    print(TMP_DATA_MODEL)
     collection_catalogue = dynamodb.Table('catalogue_central')
     #? 1. Check if the item was already catalogued
     ipoItemCatalogued = collection_catalogue.query(

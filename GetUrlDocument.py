@@ -8,6 +8,9 @@ retries = Retry(total=50,
                 status_forcelist=[ 500, 502, 503, 504 ])
 
 def getHTMLDocument(url):
-    requester.mount('http://',HTTPAdapter(max_retries=retries))
-    response = requester.get(url)
-    return response.text
+    try:
+        requester.mount('http://',HTTPAdapter(max_retries=retries))
+        response = requester.get(url)
+        return response.text
+    except:
+        getHTMLDocument(url)

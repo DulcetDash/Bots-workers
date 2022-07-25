@@ -23,11 +23,9 @@ import urllib.parse
 from scrapingant_client import ScrapingAntClient
 import http.client
 import json
-import boto3
-from boto3.dynamodb.conditions import Key, Attr
 import uuid
-
-dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:8000')
+import GetUrlDocument
+import SaveOrUpdateItem
 
 conn = http.client.HTTPSConnection("api.scrapingant.com")
 
@@ -54,14 +52,11 @@ headers = {
 }
 
 
-def getHTMLDocument(url):
-    response = requests.get(url)
-    return response.text
-
 
 def launchBot():
+    os.system('clear')
+
     try:
-        collection_catalogue = dynamodb.Table('catalogue_central')
         shop_fp = 'pephome8937557322322'
 
 
@@ -156,6 +151,7 @@ def launchBot():
 
                                 res = conn.getresponse()
                                 data = res.read()
+                                
 
                                 product_final_data = BeautifulSoup(json.loads(data.decode("utf-8"))['content'], 'html.parser')
 
@@ -164,7 +160,7 @@ def launchBot():
                                 product_price = str(product_final_data.find('div',{'class':'product-wrapper'}).find('span', {'class':'final-price'}).get_text()).strip()
                                 product_image = str(product_final_data.find('div', {'class':'gallery-wrap'}).find('img')['src']).strip()
                                 #Get the sizes
-                                print(payload)
+                                print(product_page_link)
                                 product_sizes_data = product_final_data.find('div', {'class':'scrollinner'}).find_all('button') if product_final_data.find('div', {'class':'scrollinner'}) is not None else []
 
                                 display_log(Fore.YELLOW,'{}% - {}'.format(round(j*100/len(products_mega_infos)),product_name))
@@ -173,6 +169,14 @@ def launchBot():
 
                                 for size in product_sizes_data:
                                     product_sizes.append(str(size.get_text()).strip())
+                                
+                                #! Determine the sku
+                                sku = product_page_link
+                                try:
+                                    sku = str(str(product_name).upper().replace(' ','_')),
+                                except:
+                                    print('Unable to determine the sku - fallback to product name')
+                                    sku = str(product_name.replace(' ', '_').lower())
                                 
                                 #Save the model
                                 #? SAVE in the db
@@ -184,7 +188,7 @@ def launchBot():
                                     'product_name': product_name,
                                     'product_price': product_price,
                                     'product_picture': [product_image],
-                                    'sku': str(product_name).upper().replace(' ','_'),
+                                    'sku': sku,
                                     'used_link': product_page_link,
                                     'meta': {
                                         'category': str(category).upper().strip(),
@@ -197,45 +201,15 @@ def launchBot():
                                         }
                                     },
                                     'date_added':  datetime.datetime.today().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                    'date_updated':  datetime.datetime.today().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
                                 }
 
-                                #? 1. Check if the item was already catalogued
-                                ipoItemCatalogued = collection_catalogue.query(
-                                    IndexName='sku-index',
-                                    KeyConditionExpression=Key('sku').eq(TMP_DATA_MODEL['sku']),
-                                    FilterExpression=Attr('product_name').eq(TMP_DATA_MODEL['product_name'])
-                                )['Items']
+                                print(sku)
 
-                                
-                                if len(ipoItemCatalogued)>0:    #? Item was already catalogued
-                                    ipoItemCatalogued = ipoItemCatalogued[0]
-                                    #? 2. Prices already updated
-                                    #? 3. Merge and unify the product pictures
-                                    #! Fix incorrect [[image_link]] format to [image_link]
-                                    TMP_DATA_MODEL['product_picture'] = TMP_DATA_MODEL['product_picture'] if isinstance(TMP_DATA_MODEL['product_picture'][0], str) else TMP_DATA_MODEL['product_picture'][0]
-                                    #!---
-                                    TMP_DATA_MODEL['product_picture'] += ipoItemCatalogued['product_picture']
-                                    TMP_DATA_MODEL['product_picture'] = list(dict.fromkeys(TMP_DATA_MODEL['product_picture']))
-                                    #? 4. Update the date updated
-                                    TMP_DATA_MODEL['date_updated'] = TMP_DATA_MODEL['date_added']
-                                    TMP_DATA_MODEL['date_added'] = ipoItemCatalogued['date_added']
-                                    #! Keep the same _id
-                                    TMP_DATA_MODEL['_id'] = ipoItemCatalogued['_id']
+                                # print(TMP_DATA_MODEL)
 
-                                    #? SAVE
-                                    collection_catalogue.put_item(
-                                        Item=TMP_DATA_MODEL
-                                    )
-                                    display_log(Fore.YELLOW,'Item updated - {}'.format(TMP_DATA_MODEL['sku']))
-                                    print(TMP_DATA_MODEL)
-                                
-
-                                else:   #? New item
-                                    display_log(Fore.YELLOW,'New item detected - {}'.format(TMP_DATA_MODEL['sku']))
-                                    collection_catalogue.put_item(
-                                        Item=TMP_DATA_MODEL
-                                    )
-                                    print(TMP_DATA_MODEL)
+                                #? Save
+                                # SaveOrUpdateItem.saveOrUpdateItem(TMP_DATA_MODEL=TMP_DATA_MODEL)
                                 print('----------')
                             except Exception as e:
                                 print(e)
@@ -247,6 +221,7 @@ def launchBot():
     
     except Exception as e:
         print(e)
+        launchBot()
 
 
 #! Debug

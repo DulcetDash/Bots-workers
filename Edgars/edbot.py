@@ -77,7 +77,11 @@ def openGeneral_subcategories(soupedPage, category, shop_name, website_link):
         if element.div != None and element.div.strong != None and element.figure != None:
             subcategory = str(element.div.strong.get_text())
             link = element.a['href']
+            # #!DEBUG
+            # if subcategory!='KDS': continue
+            
             display_log(Fore.CYAN, '{}. {}'.format(i+1, subcategory))
+
             # tmpText = category.lower()
             #? Get the products
             if len(link) > 0:
@@ -95,8 +99,10 @@ def getProductsFor(link, category, shop_name, website_link, subcategory):
     data_page = int(souped.find('span', {'class':'infinite-scrolling load-more-wrapper'})['data-page-count'])
     display_log(Fore.LIGHTYELLOW_EX, 'Found {} pages for this product'.format(data_page))
     for i in range(data_page):
-        display_log(Fore.LIGHTYELLOW_EX, '[{}] {}'.format(i+1, link + '?p=' + str(i+1)))
-        soupedProducts = BeautifulSoup(GetUrlDocument.getHTMLDocument(link + '?p=' + str(i+1)), 'html.parser')
+        checkedProductsLink = link + '&p=' + str(i+1) if re.search("\?", link)  else link + '?p=' + str(i+1)
+
+        display_log(Fore.LIGHTYELLOW_EX, '[{}] {}'.format(i+1, checkedProductsLink))
+        soupedProducts = BeautifulSoup(GetUrlDocument.getHTMLDocument(checkedProductsLink), 'html.parser')
         all_products = soupedProducts.find_all('li', {"class":'item product product-item'})
         #Navigate through all the products
         for j, product in enumerate(all_products):
