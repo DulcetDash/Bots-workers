@@ -1,0 +1,11 @@
+{
+  "python.sortImportsArgs": ["--profile", "black"],
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": false
+  },
+  "python.formatting.provider": "autopep8",
+  "python.formatting.autopep8Args": ["--ignore", "E402"],
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python"
+  }
+}
