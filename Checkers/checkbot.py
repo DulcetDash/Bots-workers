@@ -28,8 +28,11 @@ import json
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 import uuid
+import ast
 
-dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:8000')
+dynamodb = boto3.resource('dynamodb', aws_access_key_id='AKIAVN5TJ6VCUP6F6QJW',
+                          aws_secret_access_key='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',
+                          region_name='us-west-1')
 
 conn = http.client.HTTPSConnection("api.scrapingant.com")
 
@@ -59,21 +62,26 @@ headers = {
 
 
 def getHTMLSOUPEDDocument(url):
-    payload = "{ \"url\": \"" + url + "\"}"
-    # 1. Get the main page
-    conn.request("POST", "/v1/general", payload, headers)
+    scrapingWaspEndpoint = "http://localhost:9000/api/v1/scraping"
+    payload = json.dumps({
+        "url": url
+    })
+    headers = {
+        'Authorization': 'Bearer SW_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.wmHxDlKGW9g1mUz2UXilej2i5qPNhM2g2wSO2L23ud4',
+        'Content-Type': 'application/json'
+    }
 
-    res = conn.getresponse()
-    data = res.read()
+    response = requests.request(
+        "POST", scrapingWaspEndpoint, headers=headers, data=payload, timeout=240)
 
-    soup = BeautifulSoup(json.loads(data.decode("utf-8"))
-                         ['content'], 'html.parser')
+    soup = BeautifulSoup(response.json()['page'], 'html.parser')
+
     return soup
 
 
 def launchBot():
     try:
-        collection_catalogue = dynamodb.Table('catalogue_central')
+        collection_catalogue = dynamodb.Table('Catalogues')
         shop_fp = 'checkers99639807992322'
 
         root_url = 'https://www.checkers.co.za'
@@ -129,7 +137,7 @@ def launchBot():
                             product_name = str(product.find(
                                 'h3', {'class': 'item-product__name'}).get_text()).strip()
                             product_price = str(product.find(
-                                'div', {'class': 'special-price__price'}).get_text()).strip()
+                                'div', {'class': 'special-price__price'}).get_text()).strip().replace('R', '')
                             product_image = root_url + \
                                 str(product.find(
                                     'div', {'class': 'item-product__image __image'}).find('img')['src'])
@@ -148,14 +156,14 @@ def launchBot():
                                 'product_picture': [product_image],
                                 'sku': str(product_name).upper().replace(' ', '_'),
                                 'used_link': product_link,
-                                'meta': {
-                                    'category': str(category).upper().strip(),
-                                    'subcategory': str(category).upper().strip(),
-                                    'shop_name': _SHOP_NAME_,
-                                    'website_link': root_url,
-                                    'description': '',
-                                },
-                                'date_added': datetime.datetime.today().replace(microsecond=0)
+                                'category': str(category).upper().strip(),
+                                'subcategory': str(category).upper().strip(),
+                                'shop_name': _SHOP_NAME_,
+                                'website_link': root_url,
+                                'description': '',
+                                # 'date_added': datetime.datetime.today().replace(microsecond=0)
+                                'createdAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                'updatedAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
                             }
 
                             # ? 1. Check if the item was already catalogued
@@ -179,8 +187,8 @@ def launchBot():
                                 TMP_DATA_MODEL['product_picture'] = list(
                                     dict.fromkeys(TMP_DATA_MODEL['product_picture']))
                                 # ? 4. Update the date updated
-                                TMP_DATA_MODEL['date_updated'] = TMP_DATA_MODEL['date_added']
-                                TMP_DATA_MODEL['date_added'] = ipoItemCatalogued['date_added']
+                                TMP_DATA_MODEL['updatedAt'] = TMP_DATA_MODEL['createdAt']
+                                TMP_DATA_MODEL['createdAt'] = ipoItemCatalogued['createdAt']
                                 #! Keep the same id
                                 TMP_DATA_MODEL['id'] = ipoItemCatalogued['id']
 
