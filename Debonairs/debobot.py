@@ -2,6 +2,10 @@
 1. Get all the catalogue from Debonairs
 '''
 # prettier-ignore
+import sys
+import os
+sys.path.append('../')
+import GetUrlDocument
 from ast import Try
 from cmath import pi
 from tkinter import E
@@ -10,9 +14,6 @@ from numpy import disp
 from pymongo import MongoClient
 import time
 from random import randint
-import sys
-import os
-sys.path.append('../')
 from tqdm import tqdm
 import csv
 import re
@@ -28,7 +29,9 @@ import boto3
 from boto3.dynamodb.conditions import Key, Attr
 import uuid
 
-dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:8000')
+dynamodb = boto3.resource('dynamodb', aws_access_key_id='AKIAVN5TJ6VCUP6F6QJW',
+                          aws_secret_access_key='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',
+                          region_name='us-west-1')
 
 conn = http.client.HTTPSConnection("api.scrapingant.com")
 
@@ -66,18 +69,20 @@ def launchBot():
     _INDEX_START_MENU_ITEM_ = 55553
 
     try:
-        collection_catalogue = dynamodb.Table('catalogue_central')
+        collection_catalogue = dynamodb.Table('Catalogues')
         shop_fp = 'debonairs97639807992322'
 
-        payload = "{ \"url\": \"https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall\"}"
-        # 1. Get the main page
-        conn.request("POST", "/v1/general", payload, headers)
+        # payload = "{ \"url\": \"https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall\"}"
+        # # 1. Get the main page
+        # conn.request("POST", "/v1/general", payload, headers)
 
-        res = conn.getresponse()
-        data = res.read()
+        # res = conn.getresponse()
+        # data = res.read()
 
-        soup = BeautifulSoup(json.loads(data.decode("utf-8"))
-                             ['content'], 'html.parser')
+        # soup = BeautifulSoup(json.loads(data.decode("utf-8"))
+        #                      ['content'], 'html.parser')
+        soup = GetUrlDocument.getHTMLSOUPEDDocument(
+            'https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall')
 
         # List all the categories of pizzas
         pizzas_categories = soup.find_all('div', {'class': 'm__listing'})
@@ -222,20 +227,19 @@ def launchBot():
                                 'product_picture': pizza_image,
                                 'sku': str(name).upper().replace(' ', '_'),
                                 'used_link': "https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(item_number) + "/" + pizza_name_asURL,
-                                'meta': {
-                                    'category': str(category).upper().strip(),
-                                    'subcategory': str(category).upper().strip(),
-                                    'shop_name': _SHOP_NAME_,
-                                    'website_link': 'https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall',
-                                    'description': pizza_description,
-                                    'options': {
-                                        'size': pizza_size,
-                                        'base': pizza_base,
-                                        'cheese': pizza_cheese,
-                                        'extra toppings and sauces': pizza_toppings
-                                    }
+                                'category': str(category).upper().strip(),
+                                'subcategory': str(category).upper().strip(),
+                                'shop_name': _SHOP_NAME_,
+                                'website_link': 'https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall',
+                                'description': pizza_description,
+                                'options': {
+                                    'size': pizza_size,
+                                    'base': pizza_base,
+                                    'cheese': pizza_cheese,
+                                    'extra toppings and sauces': pizza_toppings
                                 },
-                                'date_added': datetime.datetime.today().replace(microsecond=0)
+                                'createdAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                'updatedAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
                             }
 
                             # ? 1. Check if the item was already catalogued
@@ -259,8 +263,8 @@ def launchBot():
                                 TMP_DATA_MODEL['product_picture'] = list(
                                     dict.fromkeys(TMP_DATA_MODEL['product_picture']))
                                 # ? 4. Update the date updated
-                                TMP_DATA_MODEL['date_updated'] = TMP_DATA_MODEL['date_added']
-                                TMP_DATA_MODEL['date_added'] = ipoItemCatalogued['date_added']
+                                TMP_DATA_MODEL['updatedAt'] = TMP_DATA_MODEL['createdAt']
+                                TMP_DATA_MODEL['createdAt'] = ipoItemCatalogued['createdAt']
                                 #! Keep the same id
                                 TMP_DATA_MODEL['id'] = ipoItemCatalogued['id']
 
@@ -348,15 +352,14 @@ def launchBot():
                                     'product_picture': pizza_image,
                                     'sku': str(name).upper().replace(' ', '_'),
                                     'used_link': "https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(item_number) + "/" + pizza_name_asURL,
-                                    'meta': {
-                                        'category': str(category).upper().strip(),
-                                        'subcategory': str(category).upper().strip(),
-                                        'shop_name': _SHOP_NAME_,
-                                        'website_link': 'https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall',
-                                        'description': pizza_description,
-                                        'options': {}
-                                    },
-                                    'date_added': datetime.datetime.today().replace(microsecond=0)
+                                    'category': str(category).upper().strip(),
+                                    'subcategory': str(category).upper().strip(),
+                                    'shop_name': _SHOP_NAME_,
+                                    'website_link': 'https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall',
+                                    'description': pizza_description,
+                                    'options': {},
+                                    'createdAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                    'updatedAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
                                 }
 
                                 # ? 1. Check if the item was already catalogued
@@ -380,8 +383,8 @@ def launchBot():
                                     TMP_DATA_MODEL['product_picture'] = list(
                                         dict.fromkeys(TMP_DATA_MODEL['product_picture']))
                                     # ? 4. Update the date updated
-                                    TMP_DATA_MODEL['date_updated'] = TMP_DATA_MODEL['date_added']
-                                    TMP_DATA_MODEL['date_added'] = ipoItemCatalogued['date_added']
+                                    TMP_DATA_MODEL['updatedAt'] = TMP_DATA_MODEL['createdAt']
+                                    TMP_DATA_MODEL['createdAt'] = ipoItemCatalogued['createdAt']
                                     #! Keep the same id
                                     TMP_DATA_MODEL['id'] = ipoItemCatalogued['id']
 
@@ -485,15 +488,14 @@ def launchBot():
                                     'product_picture': pizza_image,
                                     'sku': str(name).upper().replace(' ', '_'),
                                     'used_link': "https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(item_number) + "/" + pizza_name_asURL,
-                                    'meta': {
-                                        'category': str(category).upper().strip(),
-                                        'subcategory': str(category).upper().strip(),
-                                        'shop_name': _SHOP_NAME_,
-                                        'website_link': 'https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall',
-                                        'description': pizza_description,
-                                        'options': options_summary
-                                    },
-                                    'date_added': datetime.datetime.today().replace(microsecond=0)
+                                    'category': str(category).upper().strip(),
+                                    'subcategory': str(category).upper().strip(),
+                                    'shop_name': _SHOP_NAME_,
+                                    'website_link': 'https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall',
+                                    'description': pizza_description,
+                                    'options': options_summary,
+                                    'createdAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                    'updatedAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
                                 }
 
                                 # ? 1. Check if the item was already catalogued
@@ -517,8 +519,8 @@ def launchBot():
                                     TMP_DATA_MODEL['product_picture'] = list(
                                         dict.fromkeys(TMP_DATA_MODEL['product_picture']))
                                     # ? 4. Update the date updated
-                                    TMP_DATA_MODEL['date_updated'] = TMP_DATA_MODEL['date_added']
-                                    TMP_DATA_MODEL['date_added'] = ipoItemCatalogued['date_added']
+                                    TMP_DATA_MODEL['updatedAt'] = TMP_DATA_MODEL['createdAt']
+                                    TMP_DATA_MODEL['createdAt'] = ipoItemCatalogued['createdAt']
                                     #! Keep the same id
                                     TMP_DATA_MODEL['id'] = ipoItemCatalogued['id']
 

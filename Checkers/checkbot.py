@@ -29,6 +29,7 @@ import boto3
 from boto3.dynamodb.conditions import Key, Attr
 import uuid
 import ast
+import traceback
 
 dynamodb = boto3.resource('dynamodb', aws_access_key_id='AKIAVN5TJ6VCUP6F6QJW',
                           aws_secret_access_key='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',
@@ -62,7 +63,7 @@ headers = {
 
 
 def getHTMLSOUPEDDocument(url):
-    scrapingWaspEndpoint = "http://localhost:9000/api/v1/scraping"
+    scrapingWaspEndpoint = "http://localhost:9500/api/v1/scraping"
     payload = json.dumps({
         "url": url
     })
@@ -72,7 +73,7 @@ def getHTMLSOUPEDDocument(url):
     }
 
     response = requests.request(
-        "POST", scrapingWaspEndpoint, headers=headers, data=payload, timeout=240)
+        "POST", scrapingWaspEndpoint, headers=headers, data=payload, timeout=500)
 
     soup = BeautifulSoup(response.json()['page'], 'html.parser')
 
@@ -95,11 +96,12 @@ def launchBot():
         display_log(Fore.BLUE, 'Finding store categories')
         # print(main_categories)
 
+
         for i, element in enumerate(main_categories):
             if element.find('div', {'class': 'department__caption'}) is not None:
                 category = str(element.find(
                     'h4', {'class': 'department__title'}).get_text()).strip()
-                next_link = root_url + str(element.find('a')['href']).strip()
+                next_link = str(element.find('a')['href']).strip().split('_/')[1]
 
                 display_log(Fore.YELLOW, '[{}] {}'.format(i, category))
 
@@ -122,6 +124,8 @@ def launchBot():
                         k) if k > 0 else ''
                     products_link = next_link + addPage
 
+                    print('PRODUCTS LINK: {}'.format(products_link))
+
                     # ? Get the products infos
                     products_megadata = getHTMLSOUPEDDocument(
                         products_link).find_all('div', {'class': 'item-product'})
@@ -138,9 +142,13 @@ def launchBot():
                                 'h3', {'class': 'item-product__name'}).get_text()).strip()
                             product_price = str(product.find(
                                 'div', {'class': 'special-price__price'}).get_text()).strip().replace('R', '')
-                            product_image = root_url + \
-                                str(product.find(
-                                    'div', {'class': 'item-product__image __image'}).find('img')['src'])
+                            
+                            # print(product)
+
+                            product_image = str(product.find(
+                                    'div', {'class': 'item-product__image __image'}).find('img')['src']).split('_/')[1] if product.find(
+                                    'div', {'class': 'item-product__image __image'}) is not None else str(product.find(
+                                    'div', {'class': 'item-product__image'}).find('img')['src']).split('_/')[1]
                             product_link = root_url + \
                                 str(product.find('a')['href']).strip()
 
@@ -161,7 +169,6 @@ def launchBot():
                                 'shop_name': _SHOP_NAME_,
                                 'website_link': root_url,
                                 'description': '',
-                                # 'date_added': datetime.datetime.today().replace(microsecond=0)
                                 'createdAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
                                 'updatedAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
                             }
@@ -210,6 +217,7 @@ def launchBot():
                             print('----------')
                         except Exception as e:
                             print(e)
+                            traceback.print_exc()
                             continue
 
             else:
@@ -217,6 +225,7 @@ def launchBot():
 
     except Exception as e:
         print(e)
+        traceback.print_exc()
 
 
 #!DEBUG

@@ -28,7 +28,9 @@ import boto3
 from boto3.dynamodb.conditions import Key, Attr
 import uuid
 
-dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:8000')
+dynamodb = boto3.resource('dynamodb', aws_access_key_id='AKIAVN5TJ6VCUP6F6QJW',
+                          aws_secret_access_key='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',
+                          region_name='us-west-1')
 
 conn = http.client.HTTPSConnection("api.scrapingant.com")
 
@@ -65,7 +67,7 @@ def getHTMLSOUPEDDocument(url):
 
 def launchBot():
     try:
-        collection_catalogue = dynamodb.Table('catalogue_central')
+        collection_catalogue = dynamodb.Table('Catalogues')
         shop_fp = 'hungrylion99639807992322'
 
         root_url = 'https://www.hungrylion.co.za/'
@@ -170,14 +172,13 @@ def launchBot():
                                                             'product_picture': [product_image],
                                                             'sku': str(product_name).upper().replace(' ', '_'),
                                                             'used_link': products_url,
-                                                            'meta': {
-                                                                'category': str(category).upper().strip(),
-                                                                'subcategory': str(subcategory_name).upper().strip(),
-                                                                'shop_name': _SHOP_NAME_,
-                                                                'website_link': root_url,
-                                                                'description': product_description,
-                                                            },
-                                                            'date_added': datetime.datetime.today().replace(microsecond=0)
+                                                            'category': str(category).upper().strip(),
+                                                            'subcategory': str(subcategory_name).upper().strip(),
+                                                            'shop_name': _SHOP_NAME_,
+                                                            'website_link': root_url,
+                                                            'description': product_description,
+                                                            'createdAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                                            'updatedAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
                                                         }
 
                                                         # ? 1. Check if the item was already catalogued
@@ -202,8 +203,8 @@ def launchBot():
                                                             TMP_DATA_MODEL['product_picture'] = list(
                                                                 dict.fromkeys(TMP_DATA_MODEL['product_picture']))
                                                             # ? 4. Update the date updated
-                                                            TMP_DATA_MODEL['date_updated'] = TMP_DATA_MODEL['date_added']
-                                                            TMP_DATA_MODEL['date_added'] = ipoItemCatalogued['date_added']
+                                                            TMP_DATA_MODEL['updatedAt'] = TMP_DATA_MODEL['createdAt']
+                                                            TMP_DATA_MODEL['createdAt'] = ipoItemCatalogued['createdAt']
                                                             #! Keep the same id
                                                             TMP_DATA_MODEL['id'] = ipoItemCatalogued['id']
 

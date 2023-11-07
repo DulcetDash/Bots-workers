@@ -138,8 +138,8 @@ def launchBot():
                                 display_log(
                                     Fore.YELLOW, '{}% - {}'.format(round(index * 100 / len(products_data)), product_name))
 
-                                product_price = Decimal(str(float(str(product_detailed_data.find('div', {
-                                    'class': 'price'}).get_text()).strip().replace('R', '').replace(',', '').split(' ')[0])))
+                                product_price = str(float(str(product_detailed_data.find('div', {
+                                    'class': 'price'}).get_text()).strip().replace('R', '').replace(',', '').split(' ')[0]))
                                 # product_barcode = str(product_detailed_data.find(text=re.compile('Barcode')).parent())
                                 # Get the images
                                 images_data = product_detailed_data.find('div', {'class': 'swiper-wrapper'}).find_all(
