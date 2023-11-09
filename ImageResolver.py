@@ -63,13 +63,17 @@ def updateImageregistry(TMP_DATA_MODEL):
                 clean_original_pictures.append(image_link)
 
                 if image_link not in local_images_registry:  # ! Not yet registered - update
-                    tmp_name = '{}-{}.jpg'.format(
-                        str(uuid.uuid4()), TMP_DATA_MODEL['shop_fp']).lower().replace('-', '_').strip()
+                    try:
+                        tmp_name = '{}-{}.jpg'.format(
+                            str(uuid.uuid4()), TMP_DATA_MODEL['shop_fp']).lower().replace('-', '_').strip()
 
-                    if upload_image_to_s3(tmp_name, image_link, 'products-images-dd'):
-                        # Update the local registry
-                        print('Saving the registry entry for -> {}'.format(tmp_name))
-                        local_images_registry[image_link] = tmp_name
+                        if upload_image_to_s3(tmp_name, image_link, 'products-images-dd'):
+                            # Update the local registry
+                            print('Saving the registry entry for -> {}'.format(tmp_name))
+                            local_images_registry[image_link] = tmp_name
+                    except:
+                        print('Error while uploading the image')
+                        continue
                 else:  # ! Already registered - ignore
                     print('Already registered, skipping')
                     continue

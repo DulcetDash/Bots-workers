@@ -73,7 +73,7 @@ def getHTMLSOUPEDDocument(url):
     }
 
     response = requests.request(
-        "POST", scrapingWaspEndpoint, headers=headers, data=payload, timeout=500)
+        "POST", scrapingWaspEndpoint, headers=headers, data=payload, timeout=30*60)
 
     soup = BeautifulSoup(response.json()['page'], 'html.parser')
 
@@ -226,6 +226,7 @@ def launchBot():
     except Exception as e:
         print(e)
         traceback.print_exc()
+        launchBot()
 
 
 #!DEBUG

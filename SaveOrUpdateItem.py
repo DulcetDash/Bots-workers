@@ -9,7 +9,7 @@ init()
 
 dynamodb = boto3.resource('dynamodb', aws_access_key_id='AKIAVN5TJ6VCUP6F6QJW',
                           aws_secret_access_key='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',
-                          region_name='us-west-1')
+                          region_name='us-east-1')
 
 
 def display_log(fore=Fore.GREEN, text=''):
@@ -20,13 +20,13 @@ def display_log(fore=Fore.GREEN, text=''):
 
 
 def saveOrUpdateItem(TMP_DATA_MODEL):
+    print('Processing persistence for item: {}'.format(TMP_DATA_MODEL['sku']))
     collection_catalogue = dynamodb.Table('Catalogues')
     # ? 1. Check if the item was already catalogued
     ipoItemCatalogued = collection_catalogue.query(
         IndexName='sku-index',
         KeyConditionExpression=Key('sku').eq(TMP_DATA_MODEL['sku']),
-        FilterExpression=Attr('product_name').eq(
-            TMP_DATA_MODEL['product_name'])
+        FilterExpression=Attr('shop_fp').eq(TMP_DATA_MODEL['shop_fp'])
     )['Items']
 
     if len(ipoItemCatalogued) > 0:  # ? Item was already catalogued
@@ -41,8 +41,8 @@ def saveOrUpdateItem(TMP_DATA_MODEL):
         TMP_DATA_MODEL['product_picture'] = list(
             dict.fromkeys(TMP_DATA_MODEL['product_picture']))
         # ? 4. Update the date updated
-        TMP_DATA_MODEL['createdAt'] = TMP_DATA_MODEL['createdAt']
-        TMP_DATA_MODEL['updatedAt'] = ipoItemCatalogued['updatedAt']
+        TMP_DATA_MODEL.pop('createdAt')
+        TMP_DATA_MODEL['updatedAt'] = TMP_DATA_MODEL['updatedAt']
         #! Keep the same id
         TMP_DATA_MODEL['id'] = ipoItemCatalogued['id']
         #! Keep the local registry image
@@ -52,8 +52,8 @@ def saveOrUpdateItem(TMP_DATA_MODEL):
             TMP_DATA_MODEL['local_images_registry'] = {}
 
         # ? Resolve the images situation
-        TMP_DATA_MODEL = ImageResolver.updateImageregistry(
-            TMP_DATA_MODEL=TMP_DATA_MODEL)
+        # TMP_DATA_MODEL = ImageResolver.updateImageregistry(
+        #     TMP_DATA_MODEL=TMP_DATA_MODEL)
 
         # ? SAVE
         collection_catalogue.put_item(
@@ -70,8 +70,8 @@ def saveOrUpdateItem(TMP_DATA_MODEL):
         TMP_DATA_MODEL['local_images_registry'] = {}
 
         # ? Resolve the images situation
-        TMP_DATA_MODEL = ImageResolver.updateImageregistry(
-            TMP_DATA_MODEL=TMP_DATA_MODEL)
+        # TMP_DATA_MODEL = ImageResolver.updateImageregistry(
+        #     TMP_DATA_MODEL=TMP_DATA_MODEL)
 
         collection_catalogue.put_item(
             Item=TMP_DATA_MODEL
