@@ -1,0 +1,52 @@
+{
+  "_id": "Checkers",
+  "startUrl": ["https://www.checkers.co.za"],
+  "selectors": [
+    {
+      "id": "product",
+      "multiple": true,
+      "parentSelectors": ["categories", "pagination"],
+      "selector": "div.item-product",
+      "type": "SelectorElement"
+    },
+    {
+      "id": "image",
+      "multiple": false,
+      "parentSelectors": ["product"],
+      "selector": "img",
+      "type": "SelectorImage"
+    },
+    {
+      "id": "price",
+      "multiple": false,
+      "parentSelectors": ["product"],
+      "regex": "",
+      "selector": "span.now",
+      "type": "SelectorText"
+    },
+    {
+      "id": "title",
+      "multiple": false,
+      "parentSelectors": ["product"],
+      "regex": "",
+      "selector": ".item-product__name a",
+      "type": "SelectorText"
+    },
+    {
+      "id": "categories",
+      "linkType": "linkFromHref",
+      "multiple": true,
+      "parentSelectors": ["_root"],
+      "selector": ".department a",
+      "type": "SelectorLink"
+    },
+    {
+      "id": "pagination",
+      "linkType": "linkFromHref",
+      "multiple": true,
+      "parentSelectors": ["categories", "pagination"],
+      "selector": ".pagination .active + li a",
+      "type": "SelectorLink"
+    }
+  ]
+}

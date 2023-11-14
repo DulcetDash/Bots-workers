@@ -1,0 +1,38 @@
+{
+  "_id": "crazystore",
+  "startUrl": [
+    "https://www.crazystore.co.za/products?items_per_page=36&sort_bef_combine=changed_DESC&page=[0-112]"
+  ],
+  "selectors": [
+    {
+      "id": "product",
+      "multiple": true,
+      "parentSelectors": ["_root"],
+      "selector": "article.commerce-product--view-mode-card",
+      "type": "SelectorElement"
+    },
+    {
+      "id": "image",
+      "multiple": false,
+      "parentSelectors": ["product"],
+      "selector": "img",
+      "type": "SelectorImage"
+    },
+    {
+      "id": "title",
+      "multiple": false,
+      "parentSelectors": ["product"],
+      "regex": "",
+      "selector": ".field--name-title a",
+      "type": "SelectorText"
+    },
+    {
+      "id": "price",
+      "multiple": false,
+      "parentSelectors": ["product"],
+      "regex": "",
+      "selector": "div.field--name-field-price",
+      "type": "SelectorText"
+    }
+  ]
+}

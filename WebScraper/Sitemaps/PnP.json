@@ -1,0 +1,70 @@
+{
+  "_id": "PicknPay",
+  "startUrl": [
+    "https://www.pnp.co.za/c/baby-423144840",
+    "https://www.pnp.co.za/c/fresh-fruit-and-vegetables-423144840",
+    "https://www.pnp.co.za/c/milk-dairy-and-eggs-423144840",
+    "https://www.pnp.co.za/c/fresh-meat-poultry-and-seafood-423144840",
+    "https://www.pnp.co.za/c/bakery-423144840",
+    "https://www.pnp.co.za/c/food-cupboard-423144840",
+    "https://www.pnp.co.za/c/chocolates-chips-and-snacks-423144840",
+    "https://www.pnp.co.za/c/frozen-food-423144840",
+    "https://www.pnp.co.za/c/ready-meals-and-desserts-423144840",
+    "https://www.pnp.co.za/c/deli-and-party-423144840",
+    "https://www.pnp.co.za/c/beverages-423144840",
+    "https://www.pnp.co.za/liquor-store",
+    "https://www.pnp.co.za/c/household-and-cleaning-423144840",
+    "https://www.pnp.co.za/c/personal-care-and-health-423144840",
+    "https://www.pnp.co.za/c/pet-care-423144840",
+    "https://www.pnp.co.za/c/home-appliances-and-outdoor-423144840",
+    "https://www.pnp.co.za/c/electronics-and-office-423144840"
+  ],
+  "selectors": [
+    {
+      "id": "product",
+      "multiple": true,
+      "parentSelectors": ["_root", "pagination"],
+      "selector": "div.product-grid-item",
+      "type": "SelectorElement"
+    },
+    {
+      "id": "pagination",
+      "linkType": "linkFromHref",
+      "multiple": true,
+      "parentSelectors": ["_root", "pagination"],
+      "selector": "a.current.disabled + a",
+      "type": "SelectorLink"
+    },
+    {
+      "id": "image",
+      "multiple": false,
+      "parentSelectors": ["product"],
+      "selector": "img",
+      "type": "SelectorImage"
+    },
+    {
+      "id": "title",
+      "multiple": false,
+      "parentSelectors": ["product"],
+      "regex": "",
+      "selector": "a.product-grid-item__info-container__name",
+      "type": "SelectorText"
+    },
+    {
+      "id": "price",
+      "multiple": false,
+      "parentSelectors": ["product"],
+      "regex": "",
+      "selector": "div.price",
+      "type": "SelectorText"
+    },
+    {
+      "id": "limit",
+      "multiple": false,
+      "parentSelectors": ["product"],
+      "regex": "",
+      "selector": "span.ng-star-inserted",
+      "type": "SelectorText"
+    }
+  ]
+}
