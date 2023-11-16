@@ -2,6 +2,7 @@ import sys
 sys.path.append('../')
 import Utility
 import SaveOrUpdateItem
+import ImageDownloader
 from pprint import pprint
 import datetime
 import uuid
@@ -14,7 +15,7 @@ import asyncio
 
 os.system('clear')
 
-data = Utility.csv_to_json('Catalogue-Nov-8-2023-Crazystore.csv')
+data = Utility.csv_to_json('crazystore.csv')
 
 shop_fp = 'crazystore839283237320032322322'
 _SHOP_NAME_ = 'CRAZY STORE'
@@ -45,14 +46,19 @@ def process_product(product):
     category = 'ALL'
     sku = product_name.upper().replace(' ', '_')
 
+    productId = str(uuid.uuid4())
+
+    # Download the image to the Image Repository
+    newProductImage = ImageDownloader.upload_image_to_s3_and_save_to_dynamodb(image_url=product_image, storeId=shop_fp, productId=productId, sku=sku)
+
     TMP_DATA_MODEL = {
-        'id': str(uuid.uuid4()),
+        'id': productId,
         'shop_fp': shop_fp,
         'brand': _SHOP_NAME_,
         'product_name': product_name,
         'product_price': product_price,
         'currency': currency,
-        'product_picture': [product_image],
+        'product_picture': [newProductImage],
         'sku': sku,
         'used_link': product_link,
         'category': category,
