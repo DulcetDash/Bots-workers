@@ -2,6 +2,7 @@ import sys
 sys.path.append('../')
 import Utility
 import SaveOrUpdateItem
+import ImageDownloader
 from pprint import pprint
 import datetime
 import uuid
@@ -11,13 +12,18 @@ import decimal
 import re
 from concurrent.futures import ThreadPoolExecutor
 import asyncio
+import Redis
 
 os.system('clear')
 
-data = Utility.csv_to_json('Catalogue-Nov-8-2023.csv')
+data = Utility.csv_to_json('Dischem - Catalogue - dischem.csv')
 
 shop_fp = 'dischem3092932883788732200043'
 _SHOP_NAME_ = 'DIS-CHEM'
+
+imagesStaticReference = Utility.get_filenames_in_directory('Images/')
+
+# print(imagesStaticReference)
 
 
 def process_product(product):
@@ -41,18 +47,30 @@ def process_product(product):
 
     product_price = str(price)
     product_image = str(product['image-src']).strip()
+    imageId = product_image.split('/')
+    imageId = imageId[len(imageId)-1]
+    imageFetched = Utility.find_image_by_id(image_urls=imagesStaticReference, image_id=imageId)
+
+    print('Image id is {}'.format(imageId))
+    print('Found image is {}'.format(imageFetched))
+
     product_link = str(product['product href']).strip()
     category = 'ALL'
     sku = product_name.upper().replace(' ', '_')
 
+    productId = str(uuid.uuid4())
+
+    # Download the image to the Image Repository
+    newProductImage = ImageDownloader.upload_image_to_s3_and_save_to_dynamodb(image_url=product_image, storeId=shop_fp, productId=productId, sku=sku, useProxy=False, directory='Images/', file_name=imageFetched)
+
     TMP_DATA_MODEL = {
-        'id': str(uuid.uuid4()),
+        'id': productId,
         'shop_fp': shop_fp,
         'brand': _SHOP_NAME_,
         'product_name': product_name,
         'product_price': product_price,
         'currency': currency,
-        'product_picture': [product_image],
+        'product_picture': [newProductImage],
         'sku': sku,
         'used_link': product_link,
         'category': category,
@@ -86,6 +104,8 @@ async def main():
     # asyncio.gather waits for all the tasks to complete
     results = await asyncio.gather(*tasks)
     print(f"All tasks returned: {len(results)}")
+    print("Clearing Redis cache")
+    Redis.delete_redis_key(shop_fp+'-catalogue')
 
 # Run the main coroutine
 asyncio.run(main())

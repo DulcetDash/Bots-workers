@@ -2,31 +2,28 @@
 1. Get all the catalogue from Hungry lion
 '''
 # prettier-ignore
+import sys
+sys.path.append('../')
+import Utility
+import SaveOrUpdateItem
+import ImageDownloader
 from ast import Try
 from cmath import pi
 from tkinter import E
 from unicodedata import category
 from numpy import disp
-from pymongo import MongoClient
 import time
 from random import randint
-import sys
-import os
-sys.path.append('../')
-from tqdm import tqdm
-import csv
-import re
 from bs4 import BeautifulSoup
 import requests
 from colorama import Back, Fore, Style, init
 init()
-import datetime
-from scrapingant_client import ScrapingAntClient
 import http.client
 import json
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 import uuid
+from decimal import Decimal
 
 dynamodb = boto3.resource('dynamodb', aws_access_key_id='AKIAVN5TJ6VCUP6F6QJW',
                           aws_secret_access_key='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',
@@ -101,7 +98,7 @@ def launchBot():
                         data_regulator = json.loads(
                             subcategory['data-jltma-wrapper-link'])
 
-                        if data_regulator['is_external'] is not 'on':
+                        if data_regulator['is_external'] != 'on':
                             if subcategory.find('figcaption', {'class': 'widget-image-caption wp-caption-text'}) is not None and str(subcategory.find('figcaption', {'class': 'widget-image-caption wp-caption-text'}).get_text()).strip().upper() not in 'DAILY SPECIALS':
                                 subcategory_name = str(subcategory.find('figcaption', {
                                                        'class': 'widget-image-caption wp-caption-text'}).get_text()).strip()
@@ -150,7 +147,6 @@ def launchBot():
                                                 if len(product) > 0:
                                                     try:
                                                         # Get the name, price and picture
-                                                        # print(product)
                                                         product_name = str(product[1].find(
                                                             'h4', {'class': 'elementor-heading-title'}).get_text()).strip()
                                                         product_price = str(product[2].find(
@@ -160,71 +156,37 @@ def launchBot():
                                                         product_description = str(product[0].find(
                                                             'p', {'class': 'jltma-image-hover-desc'}).get_text()).strip()
 
+                                                        productId = str(uuid.uuid4())
+                                                        sku = str(product_name).upper().replace(' ', '_')
+
+                                                        currency, price = Utility.extract_currency_and_price(product_price)
+
+                                                        # Download the image to the Image Repository
+                                                        newProductImage = ImageDownloader.upload_image_to_s3_and_save_to_dynamodb(image_url=product_image, storeId=shop_fp, productId=productId, sku=sku, useProxy=False)
+
                                                         # Save the model
                                                         # ? SAVE in the db
                                                         # Compile the whole product data model
                                                         TMP_DATA_MODEL = {
-                                                            'id': str(uuid.uuid4()),
+                                                            'id': productId,
                                                             'shop_fp': shop_fp,
                                                             'brand': _SHOP_NAME_,
                                                             'product_name': product_name,
-                                                            'product_price': product_price,
-                                                            'product_picture': [product_image],
-                                                            'sku': str(product_name).upper().replace(' ', '_'),
+                                                            'product_price': str(price),
+                                                            'currency': currency,
+                                                            'product_picture': [newProductImage],
+                                                            'sku': sku,
                                                             'used_link': products_url,
                                                             'category': str(category).upper().strip(),
                                                             'subcategory': str(subcategory_name).upper().strip(),
                                                             'shop_name': _SHOP_NAME_,
                                                             'website_link': root_url,
                                                             'description': product_description,
-                                                            'createdAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                                            'updatedAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
+                                                            'createdAt': int(time.time()) * 1000,
+                                                            'updatedAt': int(time.time()) * 1000
                                                         }
 
-                                                        # ? 1. Check if the item was already catalogued
-                                                        ipoItemCatalogued = collection_catalogue.query(
-                                                            IndexName='sku-index',
-                                                            KeyConditionExpression=Key(
-                                                                'sku').eq(TMP_DATA_MODEL['sku']),
-                                                            FilterExpression=Attr('product_name').eq(
-                                                                TMP_DATA_MODEL['product_name'])
-                                                        )['Items']
-
-                                                        # ? Item was already catalogued
-                                                        if len(ipoItemCatalogued) > 0:
-                                                            ipoItemCatalogued = ipoItemCatalogued[0]
-                                                            # ? 2. Prices already updated
-                                                            # ? 3. Merge and unify the product pictures
-                                                            #! Fix incorrect [[image_link]] format to [image_link]
-                                                            TMP_DATA_MODEL['product_picture'] = TMP_DATA_MODEL['product_picture'] if isinstance(
-                                                                TMP_DATA_MODEL['product_picture'][0], str) else TMP_DATA_MODEL['product_picture'][0]
-                                                            #!---
-                                                            TMP_DATA_MODEL['product_picture'] += ipoItemCatalogued['product_picture']
-                                                            TMP_DATA_MODEL['product_picture'] = list(
-                                                                dict.fromkeys(TMP_DATA_MODEL['product_picture']))
-                                                            # ? 4. Update the date updated
-                                                            TMP_DATA_MODEL['updatedAt'] = TMP_DATA_MODEL['createdAt']
-                                                            TMP_DATA_MODEL['createdAt'] = ipoItemCatalogued['createdAt']
-                                                            #! Keep the same id
-                                                            TMP_DATA_MODEL['id'] = ipoItemCatalogued['id']
-
-                                                            # ? SAVE
-                                                            collection_catalogue.put_item(
-                                                                Item=TMP_DATA_MODEL
-                                                            )
-                                                            display_log(
-                                                                Fore.YELLOW, 'Item updated - {}'.format(TMP_DATA_MODEL['sku']))
-                                                            print(
-                                                                TMP_DATA_MODEL)
-
-                                                        else:  # ? New item
-                                                            display_log(
-                                                                Fore.YELLOW, 'New item detected - {}'.format(TMP_DATA_MODEL['sku']))
-                                                            collection_catalogue.put_item(
-                                                                Item=TMP_DATA_MODEL
-                                                            )
-                                                            print(
-                                                                TMP_DATA_MODEL)
+                                                        SaveOrUpdateItem.saveOrUpdateItem(TMP_DATA_MODEL=TMP_DATA_MODEL)
                                                         print('----------')
                                                     except Exception as e:
                                                         print(e)

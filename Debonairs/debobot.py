@@ -3,15 +3,16 @@
 '''
 # prettier-ignore
 import sys
-import os
 sys.path.append('../')
+import Utility
+import SaveOrUpdateItem
+import ImageDownloader
 import GetUrlDocument
 from ast import Try
 from cmath import pi
 from tkinter import E
 from unicodedata import category
 from numpy import disp
-from pymongo import MongoClient
 import time
 from random import randint
 from tqdm import tqdm
@@ -22,7 +23,6 @@ import requests
 from colorama import Back, Fore, Style, init
 init()
 import datetime
-from scrapingant_client import ScrapingAntClient
 import http.client
 import json
 import boto3
@@ -52,13 +52,6 @@ def display_log(fore=Fore.GREEN, text=''):
 display_log(Fore.GREEN, 'ROBOT NAME: DEBOBOT')
 display_log(Fore.GREEN, _SHOP_NAME_)
 
-# Create a ScrapingAntClient instance
-headers = {
-    'x-api-key': "53ea95eb0dd346f9a53ba3188a41a29e",
-    'content-type': "application/json",
-    'accept': "application/json"
-}
-
 
 def getHTMLDocument(url):
     response = requests.get(url)
@@ -66,7 +59,7 @@ def getHTMLDocument(url):
 
 
 def launchBot():
-    _INDEX_START_MENU_ITEM_ = 55553
+    _INDEX_START_MENU_ITEM_ = 80384
 
     try:
         collection_catalogue = dynamodb.Table('Catalogues')
@@ -105,6 +98,12 @@ def launchBot():
                         'h3', {'class': 'm-list-item__name'}).get_text()).replace("\"", "").strip()
                     pizza_price = str(pizza_type.find(
                         'p', {'class': 'm-list-item__price'}).get_text()).replace('+', '').strip()
+
+                    currency, price = Utility.extract_currency_and_price(pizza_price)
+
+                    pizza_price = price
+                    pizza_currency = currency
+
                     # ? Create the modal link
                     item_number = _INDEX_START_MENU_ITEM_
                     # https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/55553/garlic-bacon-%E2%80%98n-jalape%C3%B1o-(new)
@@ -113,25 +112,28 @@ def launchBot():
 
                     _INDEX_START_MENU_ITEM_ = 55572 if pizza_name_asURL is 'custard-malva-pudding-(new)' else _INDEX_START_MENU_ITEM_
 
-                    item_number = 55432 if pizza_name_asURL is 'on-the-double®' else 55570 if pizza_name_asURL is 'on-the-double®-feast' else 55433 if pizza_name_asURL is 'on-the-triple®' else 55571 if pizza_name_asURL is 'on-the-triple®-feast' else _INDEX_START_MENU_ITEM_
+                    item_number = 80383 if pizza_name_asURL is 'on-the-double®' else 55570 if pizza_name_asURL is 'on-the-double®-feast' else 80402 if pizza_name_asURL is 'on-the-triple®' else 55571 if pizza_name_asURL is 'on-the-triple®-feast' else _INDEX_START_MENU_ITEM_
                     # print(pizza_name_asURL)
                     #! Exlude: on the double/triple
                     if pizza_name_asURL not in ['on-the-double®', 'on-the-double®-feast', 'on-the-triple®', 'on-the-triple®-feast']:
                         print('{} -> {}'.format(item_number, pizza_name_asURL))
 
-                        payload = "{ \"url\": \"https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(
-                            item_number) + "/" + pizza_name_asURL + "\"}"
+                        # payload = "{ \"url\": \"https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(
+                        #     item_number) + "/" + pizza_name_asURL + "\"}"
 
-                        # 1. Get the main page
-                        conn.request("POST", "/v1/general",
-                                     payload.encode('utf-8'), headers)
+                        # # 1. Get the main page
+                        # conn.request("POST", "/v1/general",
+                        #              payload.encode('utf-8'), headers)
 
-                        res = conn.getresponse()
-                        data = res.read()
+                        # res = conn.getresponse()
+                        # data = res.read()
 
-                        if data.decode("utf-8") is not None:
-                            soupPizza = BeautifulSoup(json.loads(
-                                data.decode("utf-8"))['content'], 'html.parser')
+                        if True:
+                            soupPizza = GetUrlDocument.getHTMLSOUPEDDocument("https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(
+                            item_number) + "/" + pizza_name_asURL)
+
+                            print("https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(
+                            item_number) + "/" + pizza_name_asURL)
 
                             # ? Extract the name, description, picture and options
                             name = soupPizza.find(
@@ -147,18 +149,23 @@ def launchBot():
                             # ? Get the pizza size options
                             options_domain = options_set.find(
                                 'div').find('ul').find_all('li')
+                            
+                            _ , pizza_size_price_0 = Utility.extract_currency_and_price(str(options_domain[0].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+                            _ , pizza_size_price_1 = Utility.extract_currency_and_price(str(options_domain[1].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+                            _ , pizza_size_price_2 = Utility.extract_currency_and_price(str(options_domain[2].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+
                             pizza_size = [
                                 {
                                     'name': str(options_domain[0].find('label').get_text()).replace('+', '').strip(),
-                                    'price': str(options_domain[0].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip()
+                                    'price': pizza_size_price_0
                                 },
                                 {
                                     'name': str(options_domain[1].find('label').get_text()).replace('+', '').strip(),
-                                    'price': str(options_domain[1].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip()
+                                    'price': pizza_size_price_1
                                 },
                                 {
                                     'name': str(options_domain[2].find('label').get_text()).replace('+', '').strip(),
-                                    'price': str(options_domain[2].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip()
+                                    'price': pizza_size_price_2
                                 },
                             ]
 
@@ -169,36 +176,46 @@ def launchBot():
                             # 1. Base
                             base_data = other_options_domain[0].find(
                                 'div').find('ul').find_all('li')
+                            
+                            _ , pizza_base_price_0 = Utility.extract_currency_and_price(str(base_data[0].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+                            _ , pizza_base_price_1 = Utility.extract_currency_and_price(str(base_data[1].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+                            _ , pizza_base_price_2 = Utility.extract_currency_and_price(str(base_data[2].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+                            _ , pizza_base_price_3 = Utility.extract_currency_and_price(str(base_data[3].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+
                             pizza_base = [
                                 {
                                     'name': str(base_data[0].find('label').get_text()).replace('+', '').strip(),
-                                    'price': str(base_data[0].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip()
+                                    'price': pizza_base_price_0
                                 },
                                 {
                                     'name': str(base_data[1].find('label').get_text()).replace('+', '').strip(),
-                                    'price': str(base_data[1].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip()
+                                    'price': pizza_base_price_1
                                 },
                                 {
                                     'name': str(base_data[2].find('label').get_text()).replace('+', '').strip(),
-                                    'price': str(base_data[2].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip()
+                                    'price': pizza_base_price_2
                                 },
                                 {
                                     'name': str(base_data[3].find('label').get_text()).replace('+', '').strip(),
-                                    'price': str(base_data[3].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip()
+                                    'price': pizza_base_price_3
                                 }
                             ]
 
                             # 2. Cheese
                             cheese_data = other_options_domain[1].find(
                                 'div').find('ul').find_all('li')
+                            
+                            _ , pizza_cheese_price_0 = Utility.extract_currency_and_price(str(cheese_data[0].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+                            _ , pizza_cheese_price_1 = Utility.extract_currency_and_price(str(cheese_data[1].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+
                             pizza_cheese = [
                                 {
                                     'name': str(cheese_data[0].find('label').get_text()).replace('+', '').strip(),
-                                    'price': str(cheese_data[0].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip()
+                                    'price': pizza_cheese_price_0
                                 },
                                 {
                                     'name': str(cheese_data[1].find('label').get_text()).replace('+', '').strip(),
-                                    'price': str(cheese_data[1].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip()
+                                    'price': pizza_cheese_price_1
                                 }
                             ]
 
@@ -209,23 +226,31 @@ def launchBot():
                             # print(extra_toppings_data)
                             pizza_toppings = []
                             for index, topping in enumerate(extra_toppings_data):
+                                _ , topping_price = Utility.extract_currency_and_price(str(topping.find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+
                                 tmpData = {
                                     'name': str(topping.find('label').get_text()).replace('+', '').strip(),
-                                    'price': str(topping.find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip()
+                                    'price': topping_price
                                 }
                                 # ...
                                 pizza_toppings.append(tmpData)
 
+                            # Download the image to the Image Repository
+                            productId = str(uuid.uuid4())
+                            sku = str(name).upper().replace(' ', '_')
+                            newProductImage = ImageDownloader.upload_image_to_s3_and_save_to_dynamodb(image_url=pizza_image, storeId=shop_fp, productId=productId, sku=sku, useProxy=False)
+
                             # ? SAVE in the db
                             # Compile the whole product data model
                             TMP_DATA_MODEL = {
-                                'id': str(uuid.uuid4()),
+                                'id': productId,
                                 'shop_fp': shop_fp,
                                 'brand': _SHOP_NAME_,
                                 'product_name': name,
                                 'product_price': pizza_price,
-                                'product_picture': pizza_image,
-                                'sku': str(name).upper().replace(' ', '_'),
+                                'currency': pizza_currency,
+                                'product_picture': [newProductImage],
+                                'sku': sku,
                                 'used_link': "https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(item_number) + "/" + pizza_name_asURL,
                                 'category': str(category).upper().strip(),
                                 'subcategory': str(category).upper().strip(),
@@ -238,51 +263,53 @@ def launchBot():
                                     'cheese': pizza_cheese,
                                     'extra toppings and sauces': pizza_toppings
                                 },
-                                'createdAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                'updatedAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
+                                'createdAt': int(time.time()) * 1000,
+                                'updatedAt': int(time.time()) * 1000
                             }
 
+                            SaveOrUpdateItem.saveOrUpdateItem(TMP_DATA_MODEL=TMP_DATA_MODEL)
+
                             # ? 1. Check if the item was already catalogued
-                            ipoItemCatalogued = collection_catalogue.query(
-                                IndexName='sku-index',
-                                KeyConditionExpression=Key(
-                                    'sku').eq(TMP_DATA_MODEL['sku']),
-                                FilterExpression=Attr('product_name').eq(
-                                    TMP_DATA_MODEL['product_name'])
-                            )['Items']
+                            # ipoItemCatalogued = collection_catalogue.query(
+                            #     IndexName='sku-index',
+                            #     KeyConditionExpression=Key(
+                            #         'sku').eq(TMP_DATA_MODEL['sku']),
+                            #     FilterExpression=Attr('product_name').eq(
+                            #         TMP_DATA_MODEL['product_name'])
+                            # )['Items']
 
-                            if len(ipoItemCatalogued) > 0:  # ? Item was already catalogued
-                                ipoItemCatalogued = ipoItemCatalogued[0]
-                                # ? 2. Prices already updated
-                                # ? 3. Merge and unify the product pictures
-                                #! Fix incorrect [[image_link]] format to [image_link]
-                                TMP_DATA_MODEL['product_picture'] = TMP_DATA_MODEL['product_picture'] if isinstance(
-                                    TMP_DATA_MODEL['product_picture'][0], str) else TMP_DATA_MODEL['product_picture'][0]
-                                #!---
-                                TMP_DATA_MODEL['product_picture'] += ipoItemCatalogued['product_picture']
-                                TMP_DATA_MODEL['product_picture'] = list(
-                                    dict.fromkeys(TMP_DATA_MODEL['product_picture']))
-                                # ? 4. Update the date updated
-                                TMP_DATA_MODEL['updatedAt'] = TMP_DATA_MODEL['createdAt']
-                                TMP_DATA_MODEL['createdAt'] = ipoItemCatalogued['createdAt']
-                                #! Keep the same id
-                                TMP_DATA_MODEL['id'] = ipoItemCatalogued['id']
+                            # if len(ipoItemCatalogued) > 0:  # ? Item was already catalogued
+                            #     ipoItemCatalogued = ipoItemCatalogued[0]
+                            #     # ? 2. Prices already updated
+                            #     # ? 3. Merge and unify the product pictures
+                            #     #! Fix incorrect [[image_link]] format to [image_link]
+                            #     TMP_DATA_MODEL['product_picture'] = TMP_DATA_MODEL['product_picture'] if isinstance(
+                            #         TMP_DATA_MODEL['product_picture'][0], str) else TMP_DATA_MODEL['product_picture'][0]
+                            #     #!---
+                            #     TMP_DATA_MODEL['product_picture'] += ipoItemCatalogued['product_picture']
+                            #     TMP_DATA_MODEL['product_picture'] = list(
+                            #         dict.fromkeys(TMP_DATA_MODEL['product_picture']))
+                            #     # ? 4. Update the date updated
+                            #     TMP_DATA_MODEL['updatedAt'] = TMP_DATA_MODEL['createdAt']
+                            #     TMP_DATA_MODEL['createdAt'] = ipoItemCatalogued['createdAt']
+                            #     #! Keep the same id
+                            #     TMP_DATA_MODEL['id'] = ipoItemCatalogued['id']
 
-                                # ? SAVE
-                                collection_catalogue.put_item(
-                                    Item=TMP_DATA_MODEL
-                                )
-                                display_log(
-                                    Fore.YELLOW, 'Item updated - {}'.format(TMP_DATA_MODEL['sku']))
-                                print(TMP_DATA_MODEL)
+                            #     # ? SAVE
+                            #     collection_catalogue.put_item(
+                            #         Item=TMP_DATA_MODEL
+                            #     )
+                            #     display_log(
+                            #         Fore.YELLOW, 'Item updated - {}'.format(TMP_DATA_MODEL['sku']))
+                            #     print(TMP_DATA_MODEL)
 
-                            else:  # ? New item
-                                display_log(
-                                    Fore.YELLOW, 'New item detected - {}'.format(TMP_DATA_MODEL['sku']))
-                                collection_catalogue.put_item(
-                                    Item=TMP_DATA_MODEL
-                                )
-                                print(TMP_DATA_MODEL)
+                            # else:  # ? New item
+                            #     display_log(
+                            #         Fore.YELLOW, 'New item detected - {}'.format(TMP_DATA_MODEL['sku']))
+                            #     collection_catalogue.put_item(
+                            #         Item=TMP_DATA_MODEL
+                            #     )
+                            #     print(TMP_DATA_MODEL)
                         print('----------')
 
                     else:
@@ -305,6 +332,11 @@ def launchBot():
                             'h3', {'class': 'm-list-item__name'}).get_text()).replace("\"", "").strip()
                         pizza_price = str(pizza_type.find(
                             'p', {'class': 'm-list-item__price'}).get_text()).replace('+', '').strip()
+                        
+                        currency, price = Utility.extract_currency_and_price(pizza_price)
+
+                        pizza_price = price
+
                         # ? Create the modal link
                         item_number = _INDEX_START_MENU_ITEM_
                         # https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/55553/garlic-bacon-%E2%80%98n-jalape%C3%B1o-(new)
@@ -313,25 +345,25 @@ def launchBot():
 
                         _INDEX_START_MENU_ITEM_ = 55572 if pizza_name_asURL is 'custard-malva-pudding-(new)' else _INDEX_START_MENU_ITEM_
 
-                        item_number = 55432 if pizza_name_asURL is 'on-the-double®' else 55570 if pizza_name_asURL is 'on-the-double®-feast' else 55433 if pizza_name_asURL is 'on-the-triple®' else 55571 if pizza_name_asURL is 'on-the-triple®-feast' else _INDEX_START_MENU_ITEM_
+                        item_number = 80383 if pizza_name_asURL is 'on-the-double®' else 55570 if pizza_name_asURL is 'on-the-double®-feast' else 80402 if pizza_name_asURL is 'on-the-triple®' else 55571 if pizza_name_asURL is 'on-the-triple®-feast' else _INDEX_START_MENU_ITEM_
 
                         #! Exlude: on the double/triple
                         if pizza_name_asURL not in ['on-the-double®', 'on-the-double®-feast', 'on-the-triple®', 'on-the-triple®-feast']:
                             print('{} -> {}'.format(item_number, pizza_name_asURL))
 
-                            payload = "{ \"url\": \"https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(
-                                item_number) + "/" + pizza_name_asURL + "\"}"
+                            # payload = "{ \"url\": \"https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(
+                            #     item_number) + "/" + pizza_name_asURL + "\"}"
 
-                            # 1. Get the main page
-                            conn.request("POST", "/v1/general",
-                                         payload.encode('utf-8'), headers)
+                            # # 1. Get the main page
+                            # conn.request("POST", "/v1/general",
+                            #              payload.encode('utf-8'), headers)
 
-                            res = conn.getresponse()
-                            data = res.read()
+                            # res = conn.getresponse()
+                            # data = res.read()
 
-                            if data.decode("utf-8") is not None:
-                                soupPizza = BeautifulSoup(json.loads(
-                                    data.decode("utf-8"))['content'], 'html.parser')
+                            if True:
+                                soupPizza = GetUrlDocument.getHTMLSOUPEDDocument("https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(
+                                item_number) + "/" + pizza_name_asURL)
 
                                 # ? Extract the name, description, picture and options
                                 name = soupPizza.find(
@@ -341,16 +373,22 @@ def launchBot():
                                 pizza_image = str(soupPizza.find(
                                     'div', {'class': 'd-image__container mi__img'})['data-for-url']).strip()
 
+                                # Download the image to the Image Repository
+                                productId = str(uuid.uuid4())
+                                sku = str(name).upper().replace(' ', '_')
+                                newProductImage = ImageDownloader.upload_image_to_s3_and_save_to_dynamodb(image_url=pizza_image, storeId=shop_fp, productId=productId, sku=sku, useProxy=False)
+
                                 # ? SAVE in the db
                                 # Compile the whole product data model
                                 TMP_DATA_MODEL = {
-                                    'id': str(uuid.uuid4()),
+                                    'id': productId,
                                     'shop_fp': shop_fp,
                                     'brand': _SHOP_NAME_,
                                     'product_name': name,
                                     'product_price': pizza_price,
-                                    'product_picture': pizza_image,
-                                    'sku': str(name).upper().replace(' ', '_'),
+                                    'currency': currency,
+                                    'product_picture': [newProductImage],
+                                    'sku': sku,
                                     'used_link': "https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(item_number) + "/" + pizza_name_asURL,
                                     'category': str(category).upper().strip(),
                                     'subcategory': str(category).upper().strip(),
@@ -358,51 +396,53 @@ def launchBot():
                                     'website_link': 'https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall',
                                     'description': pizza_description,
                                     'options': {},
-                                    'createdAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                    'updatedAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
+                                    'createdAt': int(time.time()) * 1000,
+                                    'updatedAt': int(time.time()) * 1000
                                 }
 
+                                SaveOrUpdateItem.saveOrUpdateItem(TMP_DATA_MODEL=TMP_DATA_MODEL)
+
                                 # ? 1. Check if the item was already catalogued
-                                ipoItemCatalogued = collection_catalogue.query(
-                                    IndexName='sku-index',
-                                    KeyConditionExpression=Key(
-                                        'sku').eq(TMP_DATA_MODEL['sku']),
-                                    FilterExpression=Attr('product_name').eq(
-                                        TMP_DATA_MODEL['product_name'])
-                                )['Items']
+                                # ipoItemCatalogued = collection_catalogue.query(
+                                #     IndexName='sku-index',
+                                #     KeyConditionExpression=Key(
+                                #         'sku').eq(TMP_DATA_MODEL['sku']),
+                                #     FilterExpression=Attr('product_name').eq(
+                                #         TMP_DATA_MODEL['product_name'])
+                                # )['Items']
 
-                                if len(ipoItemCatalogued) > 0:  # ? Item was already catalogued
-                                    ipoItemCatalogued = ipoItemCatalogued[0]
-                                    # ? 2. Prices already updated
-                                    # ? 3. Merge and unify the product pictures
-                                    #! Fix incorrect [[image_link]] format to [image_link]
-                                    TMP_DATA_MODEL['product_picture'] = TMP_DATA_MODEL['product_picture'] if isinstance(
-                                        TMP_DATA_MODEL['product_picture'][0], str) else TMP_DATA_MODEL['product_picture'][0]
-                                    #!---
-                                    TMP_DATA_MODEL['product_picture'] += ipoItemCatalogued['product_picture']
-                                    TMP_DATA_MODEL['product_picture'] = list(
-                                        dict.fromkeys(TMP_DATA_MODEL['product_picture']))
-                                    # ? 4. Update the date updated
-                                    TMP_DATA_MODEL['updatedAt'] = TMP_DATA_MODEL['createdAt']
-                                    TMP_DATA_MODEL['createdAt'] = ipoItemCatalogued['createdAt']
-                                    #! Keep the same id
-                                    TMP_DATA_MODEL['id'] = ipoItemCatalogued['id']
+                                # if len(ipoItemCatalogued) > 0:  # ? Item was already catalogued
+                                #     ipoItemCatalogued = ipoItemCatalogued[0]
+                                #     # ? 2. Prices already updated
+                                #     # ? 3. Merge and unify the product pictures
+                                #     #! Fix incorrect [[image_link]] format to [image_link]
+                                #     TMP_DATA_MODEL['product_picture'] = TMP_DATA_MODEL['product_picture'] if isinstance(
+                                #         TMP_DATA_MODEL['product_picture'][0], str) else TMP_DATA_MODEL['product_picture'][0]
+                                #     #!---
+                                #     TMP_DATA_MODEL['product_picture'] += ipoItemCatalogued['product_picture']
+                                #     TMP_DATA_MODEL['product_picture'] = list(
+                                #         dict.fromkeys(TMP_DATA_MODEL['product_picture']))
+                                #     # ? 4. Update the date updated
+                                #     TMP_DATA_MODEL['updatedAt'] = TMP_DATA_MODEL['createdAt']
+                                #     TMP_DATA_MODEL['createdAt'] = ipoItemCatalogued['createdAt']
+                                #     #! Keep the same id
+                                #     TMP_DATA_MODEL['id'] = ipoItemCatalogued['id']
 
-                                    # ? SAVE
-                                    collection_catalogue.put_item(
-                                        Item=TMP_DATA_MODEL
-                                    )
-                                    display_log(
-                                        Fore.YELLOW, 'Item updated - {}'.format(TMP_DATA_MODEL['sku']))
-                                    print(TMP_DATA_MODEL)
+                                #     # ? SAVE
+                                #     collection_catalogue.put_item(
+                                #         Item=TMP_DATA_MODEL
+                                #     )
+                                #     display_log(
+                                #         Fore.YELLOW, 'Item updated - {}'.format(TMP_DATA_MODEL['sku']))
+                                #     print(TMP_DATA_MODEL)
 
-                                else:  # ? New item
-                                    display_log(
-                                        Fore.YELLOW, 'New item detected - {}'.format(TMP_DATA_MODEL['sku']))
-                                    collection_catalogue.put_item(
-                                        Item=TMP_DATA_MODEL
-                                    )
-                                    print(TMP_DATA_MODEL)
+                                # else:  # ? New item
+                                #     display_log(
+                                #         Fore.YELLOW, 'New item detected - {}'.format(TMP_DATA_MODEL['sku']))
+                                #     collection_catalogue.put_item(
+                                #         Item=TMP_DATA_MODEL
+                                #     )
+                                #     print(TMP_DATA_MODEL)
                             print('----------')
 
                         #! Keep going with the item number - crucial
@@ -418,6 +458,11 @@ def launchBot():
                             'h3', {'class': 'm-list-item__name'}).get_text()).replace("\"", "").strip()
                         pizza_price = str(pizza_type.find(
                             'p', {'class': 'm-list-item__price'}).get_text()).replace('+', '').strip()
+
+                        currency, price = Utility.extract_currency_and_price(pizza_price)
+
+                        pizza_price = price
+
                         # ? Create the modal link
                         item_number = _INDEX_START_MENU_ITEM_
                         # https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/55553/garlic-bacon-%E2%80%98n-jalape%C3%B1o-(new)
@@ -431,26 +476,26 @@ def launchBot():
 
                         # print('IN condition {}'.format(pizza_name_asURL in '500ml-buddy'))
                         # print('IS condition {}'.format(pizza_name_asURL is '500ml-buddy'))
-                        item_number = 55591 if pizza_name_asURL in '500ml-buddy' else 55592 if pizza_name_asURL in '2l-softdrink' else 55593 if pizza_name_asURL in 'water' else _INDEX_START_MENU_ITEM_
+                        item_number = 80425 if pizza_name_asURL in '500ml-buddy' else 80426 if pizza_name_asURL in '2l-softdrink' else 80427 if pizza_name_asURL in 'water' else _INDEX_START_MENU_ITEM_
                         _INDEX_START_MENU_ITEM_ = item_number
 
                         #! Exlude: on the double/triple
                         if pizza_name_asURL not in ['on-the-double®', 'on-the-double®-feast', 'on-the-triple®', 'on-the-triple®-feast']:
                             print('{} -> {}'.format(item_number, pizza_name_asURL))
 
-                            payload = "{ \"url\": \"https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(
-                                item_number) + "/" + pizza_name_asURL + "\"}"
+                            # payload = "{ \"url\": \"https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(
+                            #     item_number) + "/" + pizza_name_asURL + "\"}"
 
-                            # 1. Get the main page
-                            conn.request("POST", "/v1/general",
-                                         payload.encode('utf-8'), headers)
+                            # # 1. Get the main page
+                            # conn.request("POST", "/v1/general",
+                            #              payload.encode('utf-8'), headers)
 
-                            res = conn.getresponse()
-                            data = res.read()
+                            # res = conn.getresponse()
+                            # data = res.read()
 
-                            if data.decode("utf-8") is not None:
-                                soupPizza = BeautifulSoup(json.loads(
-                                    data.decode("utf-8"))['content'], 'html.parser')
+                            if True:
+                                soupPizza = GetUrlDocument.getHTMLSOUPEDDocument("https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(
+                                item_number) + "/" + pizza_name_asURL)
 
                                 # ? Extract the name, description, picture and options
                                 name = soupPizza.find(
@@ -470,23 +515,32 @@ def launchBot():
                                 options_summary = []
 
                                 for l, option in enumerate(options_domain):
+                                    _, optionPrice = Utility.extract_currency_and_price(str(option.find('span', {'class': 'mi__option-price'}).get_text()).strip())
+
                                     tmpOptionData = {
                                         'name': str(option.find('label').get_text()).strip(),
-                                        'price': str(option.find('span', {'class': 'mi__option-price'}).get_text()).strip()
+                                        'price': optionPrice
                                     }
                                     # Save
                                     options_summary.append(tmpOptionData)
 
+                                
+                                # Download the image to the Image Repository
+                                productId = str(uuid.uuid4())
+                                sku = str(name).upper().replace(' ', '_')
+                                newProductImage = ImageDownloader.upload_image_to_s3_and_save_to_dynamodb(image_url=pizza_image, storeId=shop_fp, productId=productId, sku=sku, useProxy=False)
+
                                 # ? SAVE in the db
                                 # Compile the whole product data model
                                 TMP_DATA_MODEL = {
-                                    'id': str(uuid.uuid4()),
+                                    'id': productId,
                                     'shop_fp': shop_fp,
                                     'brand': _SHOP_NAME_,
                                     'product_name': name,
                                     'product_price': pizza_price,
-                                    'product_picture': pizza_image,
-                                    'sku': str(name).upper().replace(' ', '_'),
+                                    'currency': currency,
+                                    'product_picture': [newProductImage],
+                                    'sku': sku,
                                     'used_link': "https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall/menu-item/" + str(item_number) + "/" + pizza_name_asURL,
                                     'category': str(category).upper().strip(),
                                     'subcategory': str(category).upper().strip(),
@@ -494,51 +548,53 @@ def launchBot():
                                     'website_link': 'https://app.debonairspizza.co.na/restaurant/8/debonairs-pizza-maerua-mall',
                                     'description': pizza_description,
                                     'options': options_summary,
-                                    'createdAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                    'updatedAt': datetime.datetime.utcnow().replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
+                                    'createdAt': int(time.time()) * 1000,
+                                    'updatedAt': int(time.time()) * 1000
                                 }
 
+                                SaveOrUpdateItem.saveOrUpdateItem(TMP_DATA_MODEL=TMP_DATA_MODEL)
+
                                 # ? 1. Check if the item was already catalogued
-                                ipoItemCatalogued = collection_catalogue.query(
-                                    IndexName='sku-index',
-                                    KeyConditionExpression=Key(
-                                        'sku').eq(TMP_DATA_MODEL['sku']),
-                                    FilterExpression=Attr('product_name').eq(
-                                        TMP_DATA_MODEL['product_name'])
-                                )['Items']
+                                # ipoItemCatalogued = collection_catalogue.query(
+                                #     IndexName='sku-index',
+                                #     KeyConditionExpression=Key(
+                                #         'sku').eq(TMP_DATA_MODEL['sku']),
+                                #     FilterExpression=Attr('product_name').eq(
+                                #         TMP_DATA_MODEL['product_name'])
+                                # )['Items']
 
-                                if len(ipoItemCatalogued) > 0:  # ? Item was already catalogued
-                                    ipoItemCatalogued = ipoItemCatalogued[0]
-                                    # ? 2. Prices already updated
-                                    # ? 3. Merge and unify the product pictures
-                                    #! Fix incorrect [[image_link]] format to [image_link]
-                                    TMP_DATA_MODEL['product_picture'] = TMP_DATA_MODEL['product_picture'] if isinstance(
-                                        TMP_DATA_MODEL['product_picture'][0], str) else TMP_DATA_MODEL['product_picture'][0]
-                                    #!---
-                                    TMP_DATA_MODEL['product_picture'] += ipoItemCatalogued['product_picture']
-                                    TMP_DATA_MODEL['product_picture'] = list(
-                                        dict.fromkeys(TMP_DATA_MODEL['product_picture']))
-                                    # ? 4. Update the date updated
-                                    TMP_DATA_MODEL['updatedAt'] = TMP_DATA_MODEL['createdAt']
-                                    TMP_DATA_MODEL['createdAt'] = ipoItemCatalogued['createdAt']
-                                    #! Keep the same id
-                                    TMP_DATA_MODEL['id'] = ipoItemCatalogued['id']
+                                # if len(ipoItemCatalogued) > 0:  # ? Item was already catalogued
+                                #     ipoItemCatalogued = ipoItemCatalogued[0]
+                                #     # ? 2. Prices already updated
+                                #     # ? 3. Merge and unify the product pictures
+                                #     #! Fix incorrect [[image_link]] format to [image_link]
+                                #     TMP_DATA_MODEL['product_picture'] = TMP_DATA_MODEL['product_picture'] if isinstance(
+                                #         TMP_DATA_MODEL['product_picture'][0], str) else TMP_DATA_MODEL['product_picture'][0]
+                                #     #!---
+                                #     TMP_DATA_MODEL['product_picture'] += ipoItemCatalogued['product_picture']
+                                #     TMP_DATA_MODEL['product_picture'] = list(
+                                #         dict.fromkeys(TMP_DATA_MODEL['product_picture']))
+                                #     # ? 4. Update the date updated
+                                #     TMP_DATA_MODEL['updatedAt'] = TMP_DATA_MODEL['createdAt']
+                                #     TMP_DATA_MODEL['createdAt'] = ipoItemCatalogued['createdAt']
+                                #     #! Keep the same id
+                                #     TMP_DATA_MODEL['id'] = ipoItemCatalogued['id']
 
-                                    # ? SAVE
-                                    collection_catalogue.put_item(
-                                        Item=TMP_DATA_MODEL
-                                    )
-                                    display_log(
-                                        Fore.YELLOW, 'Item updated - {}'.format(TMP_DATA_MODEL['sku']))
-                                    print(TMP_DATA_MODEL)
+                                #     # ? SAVE
+                                #     collection_catalogue.put_item(
+                                #         Item=TMP_DATA_MODEL
+                                #     )
+                                #     display_log(
+                                #         Fore.YELLOW, 'Item updated - {}'.format(TMP_DATA_MODEL['sku']))
+                                #     print(TMP_DATA_MODEL)
 
-                                else:  # ? New item
-                                    display_log(
-                                        Fore.YELLOW, 'New item detected - {}'.format(TMP_DATA_MODEL['sku']))
-                                    collection_catalogue.put_item(
-                                        Item=TMP_DATA_MODEL
-                                    )
-                                    print(TMP_DATA_MODEL)
+                                # else:  # ? New item
+                                #     display_log(
+                                #         Fore.YELLOW, 'New item detected - {}'.format(TMP_DATA_MODEL['sku']))
+                                #     collection_catalogue.put_item(
+                                #         Item=TMP_DATA_MODEL
+                                #     )
+                                #     print(TMP_DATA_MODEL)
                             print('----------')
 
                         #! Keep going with the item number - crucial

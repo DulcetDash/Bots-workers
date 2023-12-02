@@ -38,7 +38,7 @@ def getHTMLPageFrom(url):
 
 
 def getHTMLSOUPEDDocument(url):
-    scrapingWaspEndpoint = "http://localhost:9000/api/v1/scraping"
+    scrapingWaspEndpoint = "http://localhost:9500/api/v1/scraping"
     payload = json.dumps({
         "url": url
     })
@@ -48,7 +48,7 @@ def getHTMLSOUPEDDocument(url):
     }
 
     response = requests.request(
-        "POST", scrapingWaspEndpoint, headers=headers, data=payload, timeout=240)
+        "POST", scrapingWaspEndpoint, headers=headers, data=payload, timeout=2040)
 
     soup = BeautifulSoup(response.json()['page'], 'html.parser')
 

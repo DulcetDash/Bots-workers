@@ -3,6 +3,7 @@ sys.path.append('../')
 import Utility
 import SaveOrUpdateItem
 import ImageDownloader
+import Redis
 from pprint import pprint
 import datetime
 import uuid
@@ -86,6 +87,8 @@ async def main():
     # asyncio.gather waits for all the tasks to complete
     results = await asyncio.gather(*tasks)
     print(f"All tasks returned: {len(results)}")
+    print("Clearing Redis cache")
+    Redis.delete_redis_key(shop_fp+'-catalogue')
 
 # Run the main coroutine
 asyncio.run(main())
