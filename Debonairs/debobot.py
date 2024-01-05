@@ -91,9 +91,7 @@ def launchBot():
             display_log(Fore.YELLOW, '[{}] {}'.format(index + 1, category))
 
             #! Exclude some categories from the complex process
-            if category in [
-                # 'Meat Pizzas', 'Chicken Pizzas', 'Vegetarian Pizzas', 'New Cheezy Range', 
-                'Speciality Pizzas']:
+            if category in ['Meat Pizzas', 'Chicken Pizzas', 'Vegetarian Pizzas', 'New Cheezy Range', 'Speciality Pizzas']:
                  #TODO: Debug
                 _INDEX_START_MENU_ITEM_ = category_map[category.upper()]
 
