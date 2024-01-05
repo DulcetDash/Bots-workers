@@ -48,7 +48,7 @@ category_map = {
     "MEAT PIZZAS": 85099,
     "CHICKEN PIZZAS": 85106,
     "VEGETARIAN PIZZAS": 85112,
-    "SPECIALTY PIZZAS": 85123,
+    "SPECIALITY PIZZAS": 85123,
     "SIDES": 85118,
     "DRINKS": 85140
 }
@@ -91,7 +91,9 @@ def launchBot():
             display_log(Fore.YELLOW, '[{}] {}'.format(index + 1, category))
 
             #! Exclude some categories from the complex process
-            if category in ['Meat Pizzas', 'Chicken Pizzas', 'Vegetarian Pizzas', 'New Cheezy Range']:
+            if category in [
+                # 'Meat Pizzas', 'Chicken Pizzas', 'Vegetarian Pizzas', 'New Cheezy Range', 
+                'Speciality Pizzas']:
                  #TODO: Debug
                 _INDEX_START_MENU_ITEM_ = category_map[category.upper()]
 
@@ -141,10 +143,12 @@ def launchBot():
                             # ? Extract the name, description, picture and options
                             name = soupPizza.find(
                                 'div', {'class': 'mi__description'}).find('h1').get_text()
+
                             pizza_description = soupPizza.find(
                                 'div', {'class': 'mi__description'}).find('p').get_text()
                             pizza_image = str(soupPizza.find(
-                                'div', {'class': 'd-image__container mi__img'})['data-for-url']).strip()
+                                'div', {'class': 'd-image__container mi__img'})['data-for-url']).strip() if soupPizza.find(
+                                'div', {'class': 'd-image__container mi__img'}) != None else 'Placeholder'
                             # get the options
                             options_set = soupPizza.find('div', {'class': 'mi__option_parent'}).find(
                                 'div', {'class': 'mi__option'})
@@ -153,9 +157,13 @@ def launchBot():
                             options_domain = options_set.find(
                                 'div').find('ul').find_all('li')
                             
+                            pizza_size_price_2 = None
+                            
                             _ , pizza_size_price_0 = Utility.extract_currency_and_price(str(options_domain[0].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
                             _ , pizza_size_price_1 = Utility.extract_currency_and_price(str(options_domain[1].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
-                            _ , pizza_size_price_2 = Utility.extract_currency_and_price(str(options_domain[2].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+
+                            if options_domain[2].find('span', {'class': 'mi__option-price'}) != None:
+                                _ , pizza_size_price_2 = Utility.extract_currency_and_price(str(options_domain[2].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
 
                             pizza_size = [
                                 {
@@ -165,51 +173,95 @@ def launchBot():
                                 {
                                     'name': str(options_domain[1].find('label').get_text()).replace('+', '').strip(),
                                     'price': pizza_size_price_1
-                                },
-                                {
-                                    'name': str(options_domain[2].find('label').get_text()).replace('+', '').strip(),
-                                    'price': pizza_size_price_2
-                                },
-                            ]
-
-                            # ? Get the base, cheese and extra toppings details
-                            other_options_domain = options_domain[3].find('div', {'class': 'mi__radio_parent'}).find(
-                                'div').find_all('div', {'class': 'mi__option'})
-
-                            # 1. Base
-                            base_data = other_options_domain[0].find(
-                                'div').find('ul').find_all('li')
-                            
-                            _ , pizza_base_price_0 = Utility.extract_currency_and_price(str(base_data[0].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
-                            _ , pizza_base_price_1 = Utility.extract_currency_and_price(str(base_data[1].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
-                            _ , pizza_base_price_2 = Utility.extract_currency_and_price(str(base_data[2].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
-                            _ , pizza_base_price_3 = Utility.extract_currency_and_price(str(base_data[3].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
-
-                            pizza_base = [
-                                {
-                                    'name': str(base_data[0].find('label').get_text()).replace('+', '').strip(),
-                                    'price': pizza_base_price_0
-                                },
-                                {
-                                    'name': str(base_data[1].find('label').get_text()).replace('+', '').strip(),
-                                    'price': pizza_base_price_1
-                                },
-                                {
-                                    'name': str(base_data[2].find('label').get_text()).replace('+', '').strip(),
-                                    'price': pizza_base_price_2
-                                },
-                                {
-                                    'name': str(base_data[3].find('label').get_text()).replace('+', '').strip(),
-                                    'price': pizza_base_price_3
                                 }
                             ]
 
+                            if pizza_size_price_2 != None:
+                                pizza_size.append({
+                                     'name': str(options_domain[2].find('label').get_text()).replace('+', '').strip(),
+                                    'price': pizza_size_price_2
+                                })
+
+                            # ? Get the base, cheese and extra toppings details
+                            other_options_domain = None
+                            has_other_options = False
+
+                            # Check if the third item in options_domain has the required div
+                            if options_domain[3].find('div', {'class': 'mi__radio_parent'}) is not None:
+                                div = options_domain[3].find('div', {'class': 'mi__radio_parent'}).find('div')
+                                if div is not None:
+                                    has_other_options = True
+
+                            # Check if the second item in options_domain has the required div
+                            if options_domain[2].find('div', {'class': 'mi__radio_parent'}) is not None:
+                                div = options_domain[2].find('div', {'class': 'mi__radio_parent'}).find('div')
+                                if div is not None:
+                                    has_other_options = True
+
+                            if has_other_options:
+                                div_3 = options_domain[3].find('div', {'class': 'mi__radio_parent'})
+                                div_2 = options_domain[2].find('div', {'class': 'mi__radio_parent'})
+
+                                if div_3 is not None and div_3.find('div') is not None:
+                                    other_options_domain = div_3.find('div').find_all('div', {'class': 'mi__option'})
+                                elif div_2 is not None and div_2.find('div') is not None:
+                                    other_options_domain = div_2.find('div').find_all('div', {'class': 'mi__option'})
+                                else:
+                                    other_options_domain = None
+
+
+                                if other_options_domain != None and len(other_options_domain) >0:
+                                    # 1. Base
+                                    base_data = other_options_domain[0].find(
+                                        'div').find('ul').find_all('li')
+                                    
+                                    _ , pizza_base_price_0 = Utility.extract_currency_and_price(str(base_data[0].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+                                    _ , pizza_base_price_1 = Utility.extract_currency_and_price(str(base_data[1].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+
+                                    pizza_base_price_2 = None
+                                    pizza_base_price_3 = None
+
+                                    if base_data[2].find('span', {'class': 'mi__option-price'})!=None:
+                                        _ , pizza_base_price_2 = Utility.extract_currency_and_price(str(base_data[2].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+                                        _ , pizza_base_price_3 = Utility.extract_currency_and_price(str(base_data[3].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+
+
+                                    pizza_base = [
+                                        {
+                                            'name': str(base_data[0].find('label').get_text()).replace('+', '').strip(),
+                                            'price': pizza_base_price_0
+                                        },
+                                        {
+                                            'name': str(base_data[1].find('label').get_text()).replace('+', '').strip(),
+                                            'price': pizza_base_price_1
+                                        }
+                                    ]
+
+                                    if pizza_base_price_2 != None:
+                                        pizza_base.append({
+                                            'name': str(base_data[2].find('label').get_text()).replace('+', '').strip(),
+                                            'price': pizza_base_price_2
+                                        })
+                                        pizza_base.append({
+                                            'name': str(base_data[3].find('label').get_text()).replace('+', '').strip(),
+                                            'price': pizza_base_price_3
+                                        })
+                                else:
+                                    other_options_domain = options_domain
+                            else:
+                                other_options_domain = options_domain[1].find('div', {'class': 'mi__radio_parent'}).find('div').find_all('div', {'class': 'mi__option'}) if len( options_domain) > 0 else options_domain[0].find('div', {'class': 'mi__radio_parent'}).find('div').find_all('div', {'class': 'mi__option'})
+
                             # 2. Cheese
                             cheese_data = other_options_domain[1].find(
-                                'div').find('ul').find_all('li')
+                                'div').find('ul').find_all('li') if other_options_domain[1].find(
+                                'div') !=None else other_options_domain
                             
-                            _ , pizza_cheese_price_0 = Utility.extract_currency_and_price(str(cheese_data[0].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
-                            _ , pizza_cheese_price_1 = Utility.extract_currency_and_price(str(cheese_data[1].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+                            pizza_cheese_price_0 = None
+                            pizza_cheese_price_1 = None
+                            
+                            if cheese_data[0].find('span', {'class': 'mi__option-price'})!=None:
+                                _ , pizza_cheese_price_0 = Utility.extract_currency_and_price(str(cheese_data[0].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+                                _ , pizza_cheese_price_1 = Utility.extract_currency_and_price(str(cheese_data[1].find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
 
                             pizza_cheese = [
                                 {
@@ -220,23 +272,28 @@ def launchBot():
                                     'name': str(cheese_data[1].find('label').get_text()).replace('+', '').strip(),
                                     'price': pizza_cheese_price_1
                                 }
-                            ]
+                            ] if pizza_cheese_price_0!=None else []
 
                             # 3. Extra toppings and sauce
                             extra_toppings_data = other_options_domain[2].find(
-                                'div').find('ul').find_all('li')
+                                'div').find('ul').find_all('li') if other_options_domain[2].find(
+                                'div').find('ul') !=None else None
 
                             # print(extra_toppings_data)
                             pizza_toppings = []
-                            for index, topping in enumerate(extra_toppings_data):
-                                _ , topping_price = Utility.extract_currency_and_price(str(topping.find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
 
-                                tmpData = {
-                                    'name': str(topping.find('label').get_text()).replace('+', '').strip(),
-                                    'price': topping_price
-                                }
-                                # ...
-                                pizza_toppings.append(tmpData)
+                            if extra_toppings_data!=None:
+                                for index, topping in enumerate(extra_toppings_data):
+                                    if topping.find('span', {'class': 'mi__option-price'}) == None: continue
+
+                                    _ , topping_price = Utility.extract_currency_and_price(str(topping.find('span', {'class': 'mi__option-price'}).get_text()).replace('+', '').strip())
+
+                                    tmpData = {
+                                        'name': str(topping.find('label').get_text()).replace('+', '').strip(),
+                                        'price': topping_price
+                                    }
+                                    # ...
+                                    pizza_toppings.append(tmpData)
 
                             # Download the image to the Image Repository
                             productId = str(uuid.uuid4())
@@ -324,7 +381,8 @@ def launchBot():
                                 pizza_description = soupPizza.find(
                                     'div', {'class': 'mi__description'}).find('p').get_text()
                                 pizza_image = str(soupPizza.find(
-                                    'div', {'class': 'd-image__container mi__img'})['data-for-url']).strip()
+                                    'div', {'class': 'd-image__container mi__img'})['data-for-url']).strip() if soupPizza.find(
+                                    'div', {'class': 'd-image__container mi__img'}) != None else 'Placeholder'
 
                                 # Download the image to the Image Repository
                                 productId = str(uuid.uuid4())
