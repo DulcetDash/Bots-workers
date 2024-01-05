@@ -275,9 +275,12 @@ def launchBot():
                             ] if pizza_cheese_price_0!=None else []
 
                             # 3. Extra toppings and sauce
-                            extra_toppings_data = other_options_domain[2].find(
-                                'div').find('ul').find_all('li') if other_options_domain[2].find(
-                                'div').find('ul') !=None else None
+                            extra_toppings_data = None
+
+                            if other_options_domain[2].find('div') != None:
+                                extra_toppings_data = other_options_domain[2].find(
+                                    'div').find('ul').find_all('li') if other_options_domain[2].find(
+                                    'div').find('ul') !=None else None
 
                             # print(extra_toppings_data)
                             pizza_toppings = []
